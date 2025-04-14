@@ -127,7 +127,7 @@ export default function IndexPage() {
     return (
         <main className="flex h-screen antialiased text-foreground bg-background">
             <SidebarProvider>
-                    <Sidebar collapsible="icon" style={{"background":"#F0EAD6"}}>
+                <Sidebar collapsible="icon" style={{"background":"#F0EAD6"}}>
                     <SidebarContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
@@ -151,16 +151,12 @@ export default function IndexPage() {
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <SidebarMenuButton>
-                                    <PlusCircle className="mr-2 h-4 w-4"/>
-                                    Guide de taille
-                                </SidebarMenuButton>
+                                <PlusCircle className="mr-2 h-4 w-4"/>
+                                Guide de taille
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <SidebarMenuButton>
-                                    <Share2 className="mr-2 h-4 w-4"/>
-                                    Visualisation 3D
-                                </SidebarMenuButton>
+                                <Share2 className="mr-2 h-4 w-4"/>
+                                Visualisation 3D
                             </SidebarMenuItem>
                         </SidebarMenu>
                         <SidebarSeparator/>
@@ -171,28 +167,20 @@ export default function IndexPage() {
                         </SidebarHeader>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton>
-                                    <User className="mr-2 h-4 w-4"/>
-                                    Profile
-                                </SidebarMenuButton>
+                                <User className="mr-2 h-4 w-4"/>
+                                Profile
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <SidebarMenuButton>
-                                    <Settings className="mr-2 h-4 w-4"/>
-                                    Settings
-                                </SidebarMenuButton>
+                                <Settings className="mr-2 h-4 w-4"/>
+                                Settings
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <SidebarMenuButton>
-                                    <Shield className="mr-2 h-4 w-4"/>
-                                    Privacy
-                                </SidebarMenuButton>
+                                <Shield className="mr-2 h-4 w-4"/>
+                                Privacy
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <SidebarMenuButton>
-                                    <Trash className="mr-2 h-4 w-4"/>
-                                    Trash
-                                </SidebarMenuButton>
+                                <Trash className="mr-2 h-4 w-4"/>
+                                Trash
                             </SidebarMenuItem>
                         </SidebarMenu>
                         <SidebarSeparator/>
@@ -214,7 +202,7 @@ export default function IndexPage() {
                                 <CardDescription>View your bonsai with your camera</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
+                                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted />
                                 {!(hasCameraPermission) && (
                                     <Alert variant="destructive">
                                         <AlertTitle>Camera Access Required</AlertTitle>
