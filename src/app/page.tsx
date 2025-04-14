@@ -128,7 +128,7 @@ export default function Home() {
           <SidebarFooter />
         </Sidebar>
         {/* Contenu principal de la page */}
-        <div className="p-4 md:p-6">
+        <div className="p-4 md:p-6 flex flex-col">
           {/* Titre principal de la section */}
           <h1 className="text-2xl font-bold text-[#386641] mb-4">Identifiez votre Bonsaï</h1>
 
