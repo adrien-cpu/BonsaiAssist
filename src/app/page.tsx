@@ -75,7 +75,7 @@ export default function Home() {
       // Appelle la fonction d'identification de l'IA
       const result = await identifySpecies({ photoUrl: imageUrl, description });
       setIdentificationResult(result); // Met à jour l'état avec le résultat
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erreur lors de l\'identification de l\'espèce :', err);
       setError('Échec de l\'identification de l\'espèce. Veuillez vérifier les entrées et réessayer.'); // Met à jour l'état d'erreur
     }
@@ -173,7 +173,7 @@ export default function Home() {
                     className="bg-[#386641] text-white hover:bg-[#2f5235] disabled:opacity-50"
                     aria-live="polite" // Informe les lecteurs d'écran des changements (ex: texte du bouton)
                   >
-                  {isLoading ? 'Identification en cours...' : 'Identifier l'espèce'}
+                  {isLoading ? 'Identification en cours...' : 'Identifier l\'espèce'}
                 </Button>
               </div>
             </CardContent>
@@ -241,4 +241,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
