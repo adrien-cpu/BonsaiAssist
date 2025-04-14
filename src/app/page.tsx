@@ -1,7 +1,18 @@
 "use client"
 
 import * as React from "react"
-import {Check, Home, MessageSquare, PlusCircle, Settings, Share2, Shield, Trash, User} from "lucide-react";
+import {
+    Check,
+    Home,
+    MessageSquare,
+    PlusCircle,
+    Settings,
+    Share2,
+    Shield,
+    Trash,
+    User,
+    Camera
+} from "lucide-react";
 
 import {useIsMobile} from "@/hooks/use-mobile"
 import {cn} from "@/lib/utils"
@@ -51,6 +62,7 @@ import {toast} from "@/hooks/use-toast";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {useState} from "react";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger} from "@/components/ui/alert-dialog";
 
 export default function IndexPage() {
     const [speciesDescription, setSpeciesDescription] = React.useState('');
@@ -62,29 +74,55 @@ export default function IndexPage() {
     const [pruningSuggestions, setPruningSuggestions] = React.useState<SuggestPruningOutput | null>(null);
     const videoRef = React.useRef<HTMLVideoElement>(null);
     const [hasCameraPermission, setHasCameraPermission] = React.useState(false);
+    const [isCameraEnabled, setIsCameraEnabled] = useState(false);
+    const [open, setOpen] = React.useState(false)
+
+    const toggleCamera = async () => {
+        if (!isCameraEnabled) {
+            setOpen(true);
+        } else {
+            setIsCameraEnabled(false);
+            if (videoRef.current && videoRef.current.srcObject) {
+                const stream = videoRef.current.srcObject as MediaStream;
+                stream.getTracks().forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+            }
+        }
+    };
+
+    const enableCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({video: true});
+            setHasCameraPermission(true);
+            setIsCameraEnabled(true);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (err) {
+            console.error('Error accessing camera:', err);
+            setHasCameraPermission(false);
+            setIsCameraEnabled(false);
+            toast({
+                variant: 'destructive',
+                title: 'Camera Access Denied',
+                description: 'Please enable camera permissions in your browser settings to use this app.',
+            });
+        }
+    };
 
     React.useEffect(() => {
-        const getCameraPermission = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({video: true});
-                setHasCameraPermission(true);
-
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-            } catch (err) {
-                console.error('Error accessing camera:', err);
-                setHasCameraPermission(false);
-                toast({
-                    variant: 'destructive',
-                    title: 'Camera Access Denied',
-                    description: 'Please enable camera permissions in your browser settings to use this app.',
-                });
+        if (isCameraEnabled) {
+            enableCamera();
+        }
+        return () => {
+            if (videoRef.current && videoRef.current.srcObject) {
+                const stream = videoRef.current.srcObject as MediaStream;
+                stream.getTracks().forEach(track => track.stop());
+                videoRef.current.srcObject = null;
             }
         };
+    }, [isCameraEnabled]);
 
-        getCameraPermission();
-    }, []);
 
     const handleIdentifySpecies = async () => {
         setIsLoading(true);
@@ -127,7 +165,7 @@ export default function IndexPage() {
     return (
         <main className="flex h-screen antialiased text-foreground bg-background">
             <SidebarProvider>
-                <Sidebar collapsible="icon" style={{"background":"#F0EAD6"}}>
+                <Sidebar collapsible="icon">
                     <SidebarContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
@@ -194,15 +232,46 @@ export default function IndexPage() {
                 </Sidebar>
                 <SidebarInset className="flex flex-col">
                     <div className="container mx-auto p-4">
-
-                        {/* Camera View */}
                         <Card>
                             <CardHeader>
                                 <CardTitle>Camera View</CardTitle>
                                 <CardDescription>View your bonsai with your camera</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted />
+                                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
+                                            {isCameraEnabled ? (
+                                                <>
+                                                    <Camera className="mr-2 h-4 w-4"/>
+                                                    Disable Camera
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Camera className="mr-2 h-4 w-4"/>
+                                                    Enable Camera
+                                                </>
+                                            )}
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure you want to enable the camera?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Enabling the camera will allow the app to access your device's camera.
+                                                Please ensure you have granted the necessary permissions.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel onClick={() => setOpen(false)}>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => {
+                                                enableCamera();
+                                                setOpen(false);
+                                            }}>Continue</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                                 {!(hasCameraPermission) && (
                                     <Alert variant="destructive">
                                         <AlertTitle>Camera Access Required</AlertTitle>
@@ -213,15 +282,14 @@ export default function IndexPage() {
                                 )}
                             </CardContent>
                         </Card>
-
-                        {/* Bonsai Identification Section */}
                         <Card>
                             <CardHeader>
                                 <CardTitle>Bonsai Identification</CardTitle>
                                 <CardDescription>Identify the species of your bonsai</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                {error && <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
+                                {error &&
+                                    <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
                                 <div className="grid gap-4">
                                     <div>
                                         <Input
@@ -246,8 +314,6 @@ export default function IndexPage() {
                                 </div>
                             </CardContent>
                         </Card>
-
-                        {/* Identification Result Section */}
                         {identificationResult && (
                             <Card>
                                 <CardHeader>
@@ -272,8 +338,6 @@ export default function IndexPage() {
                                 </CardContent>
                             </Card>
                         )}
-
-                        {/* Pruning Suggestions Section */}
                         <Card>
                             <CardHeader>
                                 <CardTitle>Pruning Suggestions</CardTitle>
@@ -296,8 +360,6 @@ export default function IndexPage() {
                                 </div>
                             </CardContent>
                         </Card>
-
-                        {/* Pruning Suggestions Result Section */}
                         {pruningSuggestions && (
                             <Card>
                                 <CardHeader>
