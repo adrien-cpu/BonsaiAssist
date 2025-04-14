@@ -127,7 +127,7 @@ export default function IndexPage() {
     return (
         <main className="flex h-screen antialiased text-foreground bg-background">
             <SidebarProvider>
-                <Sidebar collapsible="icon" style={{"background":"#F0EAD6"}}>
+                    <Sidebar collapsible="icon" style={{"background":"#F0EAD6"}}>
                     <SidebarContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
