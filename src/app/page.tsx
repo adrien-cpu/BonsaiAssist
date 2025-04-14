@@ -99,13 +99,13 @@ export default function IndexPage() {
                 videoRef.current.srcObject = stream;
             }
         } catch (err) {
-            console.error('Error accessing camera:', err);
+            console.error('Erreur lors de l\'accès à la caméra :', err);
             setHasCameraPermission(false);
             setIsCameraEnabled(false);
             toast({
                 variant: 'destructive',
-                title: 'Camera Access Denied',
-                description: 'Please enable camera permissions in your browser settings to use this app.',
+                title: 'Accès à la caméra refusé',
+                description: 'Veuillez activer les autorisations de la caméra dans les paramètres de votre navigateur pour utiliser cette application.',
             });
         }
     };
@@ -200,31 +200,31 @@ export default function IndexPage() {
                         <SidebarSeparator/>
                         <SidebarHeader>
                             <SidebarGroupLabel>
-                                Account
+                                Compte
                             </SidebarGroupLabel>
                         </SidebarHeader>
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <User className="mr-2 h-4 w-4"/>
-                                Profile
+                                Profil
                             </SidebarMenuItem>
                             <SidebarMenuItem>
                                 <Settings className="mr-2 h-4 w-4"/>
-                                Settings
+                                Paramètres
                             </SidebarMenuItem>
                             <SidebarMenuItem>
                                 <Shield className="mr-2 h-4 w-4"/>
-                                Privacy
+                                Confidentialité
                             </SidebarMenuItem>
                             <SidebarMenuItem>
                                 <Trash className="mr-2 h-4 w-4"/>
-                                Trash
+                                Corbeille
                             </SidebarMenuItem>
                         </SidebarMenu>
                         <SidebarSeparator/>
                         <SidebarFooter>
                             <p className="text-xs text-muted-foreground">
-                                Make beautiful websites regardless of your design experience.
+                                Créez de magnifiques sites web, quelle que soit votre expérience en design.
                             </p>
                         </SidebarFooter>
                     </SidebarContent>
@@ -234,8 +234,8 @@ export default function IndexPage() {
                     <div className="container mx-auto p-4">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Camera View</CardTitle>
-                                <CardDescription>View your bonsai with your camera</CardDescription>
+                                <CardTitle>Vue Caméra</CardTitle>
+                                <CardDescription>Visualisez votre bonsaï avec votre caméra</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
@@ -245,38 +245,38 @@ export default function IndexPage() {
                                             {isCameraEnabled ? (
                                                 <>
                                                     <Camera className="mr-2 h-4 w-4"/>
-                                                    Disable Camera
+                                                    Désactiver la caméra
                                                 </>
                                             ) : (
                                                 <>
                                                     <Camera className="mr-2 h-4 w-4"/>
-                                                    Enable Camera
+                                                    Activer la caméra
                                                 </>
                                             )}
                                         </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure you want to enable the camera?</AlertDialogTitle>
+                                            <AlertDialogTitle>Êtes-vous sûr de vouloir activer la caméra ?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                Enabling the camera will allow the app to access your device's camera.
-                                                Please ensure you have granted the necessary permissions.
+                                                L'activation de la caméra permettra à l'application d'accéder à la caméra de votre appareil.
+                                                Veuillez vous assurer que vous avez accordé les autorisations nécessaires.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
-                                            <AlertDialogCancel onClick={() => setOpen(false)}>Cancel</AlertDialogCancel>
+                                            <AlertDialogCancel onClick={() => setOpen(false)}>Annuler</AlertDialogCancel>
                                             <AlertDialogAction onClick={() => {
                                                 enableCamera();
                                                 setOpen(false);
-                                            }}>Continue</AlertDialogAction>
+                                            }}>Continuer</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
                                 {!(hasCameraPermission) && (
                                     <Alert variant="destructive">
-                                        <AlertTitle>Camera Access Required</AlertTitle>
+                                        <AlertTitle>Accès à la caméra requis</AlertTitle>
                                         <AlertDescription>
-                                            Please allow camera access to use this feature.
+                                            Veuillez autoriser l'accès à la caméra pour utiliser cette fonctionnalité.
                                         </AlertDescription>
                                     </Alert>
                                 )}
@@ -284,24 +284,24 @@ export default function IndexPage() {
                         </Card>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Bonsai Identification</CardTitle>
-                                <CardDescription>Identify the species of your bonsai</CardDescription>
+                                <CardTitle>Identification du Bonsaï</CardTitle>
+                                <CardDescription>Identifiez l'espèce de votre bonsaï</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 {error &&
-                                    <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
+                                    <Alert variant="destructive"><AlertTitle>Erreur</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
                                 <div className="grid gap-4">
                                     <div>
                                         <Input
                                             type="url"
-                                            placeholder="Photo URL"
+                                            placeholder="URL de la photo"
                                             value={photoUrl || ''}
                                             onChange={(e) => setPhotoUrl(e.target.value)}
                                         />
                                     </div>
                                     <div>
                                         <Textarea
-                                            placeholder="Description of the bonsai"
+                                            placeholder="Description du bonsaï"
                                             value={speciesDescription}
                                             onChange={(e) => setSpeciesDescription(e.target.value)}
                                         />
@@ -309,7 +309,7 @@ export default function IndexPage() {
                                     <Button onClick={handleIdentifySpecies} disabled={isLoading}>
                                         {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin"/> :
                                             <Icons.search className="mr-2 h-4 w-4"/>}
-                                        Identify Species
+                                        Identifier l'espèce
                                     </Button>
                                 </div>
                             </CardContent>
@@ -317,21 +317,21 @@ export default function IndexPage() {
                         {identificationResult && (
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Identification Result</CardTitle>
-                                    <CardDescription>Here are the details of the identified species</CardDescription>
+                                    <CardTitle>Résultat de l'identification</CardTitle>
+                                    <CardDescription>Voici les détails de l'espèce identifiée</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <Accordion type="single" collapsible>
                                         <AccordionItem value="species">
-                                            <AccordionTrigger>Species</AccordionTrigger>
+                                            <AccordionTrigger>Espèce</AccordionTrigger>
                                             <AccordionContent>{identificationResult.species}</AccordionContent>
                                         </AccordionItem>
                                         <AccordionItem value="confidence">
-                                            <AccordionTrigger>Confidence</AccordionTrigger>
+                                            <AccordionTrigger>Confiance</AccordionTrigger>
                                             <AccordionContent>{identificationResult.confidence}</AccordionContent>
                                         </AccordionItem>
                                         <AccordionItem value="characteristics">
-                                            <AccordionTrigger>Characteristics</AccordionTrigger>
+                                            <AccordionTrigger>Caractéristiques</AccordionTrigger>
                                             <AccordionContent>{identificationResult.characteristics}</AccordionContent>
                                         </AccordionItem>
                                     </Accordion>
@@ -340,14 +340,14 @@ export default function IndexPage() {
                         )}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Pruning Suggestions</CardTitle>
-                                <CardDescription>Get personalized pruning suggestions for your bonsai</CardDescription>
+                                <CardTitle>Suggestions de taille</CardTitle>
+                                <CardDescription>Obtenez des suggestions de taille personnalisées pour votre bonsaï</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid gap-4">
                                     <div>
                                         <Textarea
-                                            placeholder="What are your goals for the bonsai (e.g., shaping, health)?"
+                                            placeholder="Quels sont vos objectifs pour le bonsaï (par exemple, mise en forme, santé) ?"
                                             value={pruningGoals}
                                             onChange={(e) => setPruningGoals(e.target.value)}
                                         />
@@ -355,7 +355,7 @@ export default function IndexPage() {
                                     <Button onClick={handleSuggestPruning} disabled={isLoading}>
                                         {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin"/> :
                                             <Icons.plus className="mr-2 h-4 w-4"/>}
-                                        Suggest Pruning
+                                        Suggérer une taille
                                     </Button>
                                 </div>
                             </CardContent>
@@ -363,8 +363,8 @@ export default function IndexPage() {
                         {pruningSuggestions && (
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Pruning Suggestions</CardTitle>
-                                    <CardDescription>Here are the pruning suggestions based on your goals</CardDescription>
+                                    <CardTitle>Suggestions de taille</CardTitle>
+                                    <CardDescription>Voici les suggestions de taille en fonction de vos objectifs</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <p>{pruningSuggestions.pruningSuggestions}</p>
