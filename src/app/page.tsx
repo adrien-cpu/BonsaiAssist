@@ -272,69 +272,61 @@ export default function IndexPage() {
                                 <CardTitle>Vue Caméra</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="flex items-center justify-between">
-                                    <CardDescription>Visualisez votre bonsaï avec votre caméra</CardDescription>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
-                                                {isCameraEnabled ? (
-                                                    <>
-                                                        <Camera className="mr-2 h-4 w-4"/>
-                                                        Désactiver la caméra
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Camera className="mr-2 h-4 w-4"/>
-                                                        Activer la caméra
-                                                    </>
-                                                )}
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Êtes-vous sûr de vouloir activer la caméra
-                                                    ?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    L'activation de la caméra permettra à l'application d'accéder à la
-                                                    caméra de votre appareil.
-                                                    Veuillez vous assurer que vous avez accordé les autorisations
-                                                    nécessaires.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel onClick={() => setOpen(false)}>Annuler</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => {
-                                                    enableCamera();
-                                                    setOpen(false);
-                                                }}>Continuer</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
-                                {!(hasCameraPermission) && (
-                                    <Alert variant="destructive">
-                                        <AlertTitle>Accès à la caméra requis</AlertTitle>
-                                        <AlertDescription>
-                                            Veuillez autoriser l'accès à la caméra pour utiliser cette fonctionnalité.
-                                        </AlertDescription>
-                                    </Alert>
-                                )}
-                                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
-                                <canvas ref={canvasRef} style={{display: 'none'}}/>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Identification du Bonsaï</CardTitle>
-                                <CardDescription>Identifiez l'espèce de votre bonsaï</CardDescription>
-                            </CardHeader>
-                            <CardContent>
                                 <Tabs defaultValue="camera" className="w-[400px]">
                                     <TabsList>
                                         <TabsTrigger value="camera">Camera</TabsTrigger>
                                         <TabsTrigger value="url">URL/Description</TabsTrigger>
                                     </TabsList>
                                     <TabsContent value="camera">
+                                        <div className="flex items-center justify-between">
+                                            <CardDescription>Visualisez votre bonsaï avec votre caméra</CardDescription>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
+                                                        {isCameraEnabled ? (
+                                                            <>
+                                                                <Camera className="mr-2 h-4 w-4"/>
+                                                                Désactiver la caméra
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Camera className="mr-2 h-4 w-4"/>
+                                                                Activer la caméra
+                                                            </>
+                                                        )}
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Êtes-vous sûr de vouloir activer la caméra
+                                                            ?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            L'activation de la caméra permettra à l'application d'accéder à la
+                                                            caméra de votre appareil.
+                                                            Veuillez vous assurer que vous avez accordé les autorisations
+                                                            nécessaires.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel onClick={() => setOpen(false)}>Annuler</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => {
+                                                            enableCamera();
+                                                            setOpen(false);
+                                                        }}>Continuer</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
+                                        {!(hasCameraPermission) && (
+                                            <Alert variant="destructive">
+                                                <AlertTitle>Accès à la caméra requis</AlertTitle>
+                                                <AlertDescription>
+                                                    Veuillez autoriser l'accès à la caméra pour utiliser cette fonctionnalité.
+                                                </AlertDescription>
+                                            </Alert>
+                                        )}
+                                        <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
+                                        <canvas ref={canvasRef} style={{display: 'none'}}/>
                                         {error && (
                                             <Alert variant="destructive">
                                                 <AlertTitle>Erreur</AlertTitle>
