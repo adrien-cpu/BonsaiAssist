@@ -5,6 +5,7 @@ import {
     Check,
     Home,
     MessageSquare,
+    Plus,
     PlusCircle,
     Settings,
     Share2,
@@ -271,7 +272,7 @@ export default function IndexPage() {
                         <SidebarSeparator/>
                         <SidebarFooter>
                             <p className="text-xs text-muted-foreground">
-                                Créez de magnifiques sites web, quelle que soit votre expérience en design.
+                                Créez de magnifiques Bonsaïs quelle que soit votre expérience en design.
                             </p>
                         </SidebarFooter>
                     </SidebarContent>
