@@ -270,8 +270,22 @@ export default function IndexPage() {
                                 </AlertDialog>
                             </CardHeader>
                             <CardContent>
-                                <CardDescription>Visualisez votre bonsaï avec votre caméra</CardDescription>
-                                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
+                                <div className="flex items-center justify-between">
+                                    <CardDescription>Visualisez votre bonsaï avec votre caméra</CardDescription>
+                                    <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
+                                        {isCameraEnabled ? (
+                                            <>
+                                                <Camera className="mr-2 h-4 w-4"/>
+                                                Désactiver la caméra
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Camera className="mr-2 h-4 w-4"/>
+                                                Activer la caméra
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
                                 {!(hasCameraPermission) && (
                                     <Alert variant="destructive">
                                         <AlertTitle>Accès à la caméra requis</AlertTitle>
@@ -280,6 +294,7 @@ export default function IndexPage() {
                                         </AlertDescription>
                                     </Alert>
                                 )}
+                                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
                             </CardContent>
                         </Card>
                         <Card>
@@ -377,3 +392,4 @@ export default function IndexPage() {
         </main>
     );
 }
+
