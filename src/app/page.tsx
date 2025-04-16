@@ -278,7 +278,8 @@ export default function IndexPage() {
                                         <TabsTrigger value="url">URL/Description</TabsTrigger>
                                     </TabsList>
                                     <TabsContent value="camera">
-                                        <CardDescription>Visualisez votre bonsaï avec votre caméra
+                                        <CardDescription className="flex items-center justify-between">
+                                            Visualisez votre bonsaï avec votre caméra
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>
                                                     <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
