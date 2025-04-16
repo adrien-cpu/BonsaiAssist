@@ -233,12 +233,8 @@ export default function IndexPage() {
                 <SidebarInset className="flex flex-col">
                     <div className="container mx-auto p-4">
                         <Card>
-                            <CardHeader>
+                            <CardHeader className="flex flex-row items-center justify-between">
                                 <CardTitle>Vue Caméra</CardTitle>
-                                <CardDescription>Visualisez votre bonsaï avec votre caméra</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
@@ -272,6 +268,10 @@ export default function IndexPage() {
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
+                            </CardHeader>
+                            <CardContent>
+                                <CardDescription>Visualisez votre bonsaï avec votre caméra</CardDescription>
+                                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
                                 {!(hasCameraPermission) && (
                                     <Alert variant="destructive">
                                         <AlertTitle>Accès à la caméra requis</AlertTitle>
