@@ -204,7 +204,7 @@ export default function IndexPage() {
                     <SidebarContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton>
+                                <SidebarMenuButton className="flex items-center">
                                     <Home className="mr-2 h-4 w-4"/>
                                     Toggle Sidebar
                                 </SidebarMenuButton>
@@ -218,18 +218,22 @@ export default function IndexPage() {
                         </SidebarHeader>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton isActive={true}>
+                                <SidebarMenuButton isActive={true} className="flex items-center">
                                     <Icons.search className="mr-2 h-4 w-4"/>
                                     Identifier l'espèce
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <PlusCircle className="mr-2 h-4 w-4"/>
-                                Guide de taille
+                                <SidebarMenuButton className="flex items-center">
+                                    <PlusCircle className="mr-2 h-4 w-4"/>
+                                    Guide de taille
+                                </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <Share2 className="mr-2 h-4 w-4"/>
-                                Visualisation 3D
+                                <SidebarMenuButton className="flex items-center">
+                                    <Share2 className="mr-2 h-4 w-4"/>
+                                    Visualisation 3D
+                                </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
                         <SidebarSeparator/>
@@ -240,20 +244,28 @@ export default function IndexPage() {
                         </SidebarHeader>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <User className="mr-2 h-4 w-4"/>
-                                Profil
+                                <SidebarMenuButton className="flex items-center">
+                                    <User className="mr-2 h-4 w-4"/>
+                                    Profil
+                                </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <Settings className="mr-2 h-4 w-4"/>
-                                Paramètres
+                                <SidebarMenuButton className="flex items-center">
+                                    <Settings className="mr-2 h-4 w-4"/>
+                                    Paramètres
+                                </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <Shield className="mr-2 h-4 w-4"/>
-                                Confidentialité
+                                <SidebarMenuButton className="flex items-center">
+                                    <Shield className="mr-2 h-4 w-4"/>
+                                    Confidentialité
+                                </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <Trash className="mr-2 h-4 w-4"/>
-                                Corbeille
+                                <SidebarMenuButton className="flex items-center">
+                                    <Trash className="mr-2 h-4 w-4"/>
+                                    Corbeille
+                                </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
                         <SidebarSeparator/>
