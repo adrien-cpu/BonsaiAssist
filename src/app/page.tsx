@@ -283,7 +283,7 @@ export default function IndexPage() {
                             <CardContent>
                                 <Tabs defaultValue="camera" className="w-[400px]">
                                     <TabsList>
-                                        <TabsTrigger value="camera">Camera</TabsTrigger>
+                                        <TabsTrigger value="camera">Caméra</TabsTrigger>
                                         <TabsTrigger value="url">URL/Description</TabsTrigger>
                                     </TabsList>
                                     <TabsContent value="camera">
