@@ -73,6 +73,7 @@ export default function IndexPage() {
     const [pruningGoals, setPruningGoals] = React.useState('');
     const [pruningSuggestions, setPruningSuggestions] = React.useState<SuggestPruningOutput | null>(null);
     const videoRef = React.useRef<HTMLVideoElement>(null);
+    const canvasRef = React.useRef<HTMLCanvasElement>(null);
     const [hasCameraPermission, setHasCameraPermission] = React.useState(false);
     const [isCameraEnabled, setIsCameraEnabled] = useState(false);
     const [open, setOpen] = React.useState(false)
@@ -122,6 +123,39 @@ export default function IndexPage() {
             }
         };
     }, [isCameraEnabled]);
+
+    const captureImage = () => {
+        if (videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/png');
+                setPhotoUrl(dataUrl);
+                handleCameraIdentifySpecies(dataUrl);
+            }
+        }
+    };
+
+    const handleCameraIdentifySpecies = async (cameraPhotoUrl: string) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            if (!cameraPhotoUrl) {
+                setError('Veuillez fournir une photo.');
+                return;
+            }
+            const result = await identifySpecies({photoUrl: cameraPhotoUrl, description: speciesDescription});
+            setIdentificationResult(result); // Met à jour l'état avec le résultat
+        } catch (err) {
+            console.error('Erreur lors de l\'identification de l\'espèce via la caméra:', err);
+            setError('Échec de l\'identification de l\'espèce. Veuillez vérifier les entrées et réessayer.'); // Met à jour l'état d'erreur
+        }
+        setIsLoading(false); // Désactive l'indicateur de chargement
+    };
 
 
     const handleIdentifySpecies = async () => {
@@ -235,56 +269,46 @@ export default function IndexPage() {
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <CardTitle>Vue Caméra</CardTitle>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
-                                            {isCameraEnabled ? (
-                                                <>
-                                                    <Camera className="mr-2 h-4 w-4"/>
-                                                    Désactiver la caméra
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Camera className="mr-2 h-4 w-4"/>
-                                                    Activer la caméra
-                                                </>
-                                            )}
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Êtes-vous sûr de vouloir activer la caméra ?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                L'activation de la caméra permettra à l'application d'accéder à la caméra de votre appareil.
-                                                Veuillez vous assurer que vous avez accordé les autorisations nécessaires.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel onClick={() => setOpen(false)}>Annuler</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => {
-                                                enableCamera();
-                                                setOpen(false);
-                                            }}>Continuer</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
                             </CardHeader>
                             <CardContent>
                                 <div className="flex items-center justify-between">
                                     <CardDescription>Visualisez votre bonsaï avec votre caméra</CardDescription>
-                                    <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
-                                        {isCameraEnabled ? (
-                                            <>
-                                                <Camera className="mr-2 h-4 w-4"/>
-                                                Désactiver la caméra
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Camera className="mr-2 h-4 w-4"/>
-                                                Activer la caméra
-                                            </>
-                                        )}
-                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
+                                                {isCameraEnabled ? (
+                                                    <>
+                                                        <Camera className="mr-2 h-4 w-4"/>
+                                                        Désactiver la caméra
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Camera className="mr-2 h-4 w-4"/>
+                                                        Activer la caméra
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Êtes-vous sûr de vouloir activer la caméra
+                                                    ?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    L'activation de la caméra permettra à l'application d'accéder à la
+                                                    caméra de votre appareil.
+                                                    Veuillez vous assurer que vous avez accordé les autorisations
+                                                    nécessaires.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel onClick={() => setOpen(false)}>Annuler</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => {
+                                                    enableCamera();
+                                                    setOpen(false);
+                                                }}>Continuer</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </div>
                                 {!(hasCameraPermission) && (
                                     <Alert variant="destructive">
@@ -295,6 +319,7 @@ export default function IndexPage() {
                                     </Alert>
                                 )}
                                 <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
+                                <canvas ref={canvasRef} style={{display: 'none'}}/>
                             </CardContent>
                         </Card>
                         <Card>
@@ -356,7 +381,8 @@ export default function IndexPage() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Suggestions de taille</CardTitle>
-                                <CardDescription>Obtenez des suggestions de taille personnalisées pour votre bonsaï</CardDescription>
+                                <CardDescription>Obtenez des suggestions de taille personnalisées pour votre
+                                    bonsaï</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid gap-4">
@@ -379,7 +405,8 @@ export default function IndexPage() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Suggestions de taille</CardTitle>
-                                    <CardDescription>Voici les suggestions de taille en fonction de vos objectifs</CardDescription>
+                                    <CardDescription>Voici les suggestions de taille en fonction de vos
+                                        objectifs</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <p>{pruningSuggestions.pruningSuggestions}</p>
@@ -392,4 +419,3 @@ export default function IndexPage() {
         </main>
     );
 }
-
