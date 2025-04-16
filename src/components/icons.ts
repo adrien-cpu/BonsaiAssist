@@ -32,6 +32,7 @@ import {
   User,
   X, // Icône de fermeture
   Workflow, // Pourrait représenter les flux AI
+  Camera
 } from 'lucide-react';
 
 /**
@@ -67,7 +68,9 @@ const Icons = {
   spinner: Loader2, // Alias commun pour loader
   trash: Trash,
   user: User,
+  camera:Camera
 };
 
 // Exportation de l'objet Icons pour utilisation dans d'autres composants
 export { Icons };
+
