@@ -272,7 +272,7 @@ export default function IndexPage() {
                         <SidebarSeparator/>
                         <SidebarFooter>
                             <p className="text-xs text-muted-foreground">
-                                Créez de magnifiques Bonsaïs quelle que soit votre expérience en design.
+                                Créez de magnifiques Bonsaïs quelle que soit votre expérience
                             </p>
                         </SidebarFooter>
                     </SidebarContent>
