@@ -11,7 +11,7 @@ import {
     Shield,
     Trash,
     User,
-    Camera
+    Camera // Ensure Camera is imported
 } from "lucide-react";
 
 import {useIsMobile} from "@/hooks/use-mobile"
@@ -63,6 +63,7 @@ import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {useState} from "react";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger} from "@/components/ui/alert-dialog";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 
 export default function IndexPage() {
     const [speciesDescription, setSpeciesDescription] = React.useState('');
@@ -328,30 +329,61 @@ export default function IndexPage() {
                                 <CardDescription>Identifiez l'espèce de votre bonsaï</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                {error &&
-                                    <Alert variant="destructive"><AlertTitle>Erreur</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
-                                <div className="grid gap-4">
-                                    <div>
-                                        <Input
-                                            type="url"
-                                            placeholder="URL de la photo"
-                                            value={photoUrl || ''}
-                                            onChange={(e) => setPhotoUrl(e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Textarea
-                                            placeholder="Description du bonsaï"
-                                            value={speciesDescription}
-                                            onChange={(e) => setSpeciesDescription(e.target.value)}
-                                        />
-                                    </div>
-                                    <Button onClick={handleIdentifySpecies} disabled={isLoading}>
-                                        {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin"/> :
-                                            <Icons.search className="mr-2 h-4 w-4"/>}
-                                        Identifier l'espèce
-                                    </Button>
-                                </div>
+                                <Tabs defaultValue="camera" className="w-[400px]">
+                                    <TabsList>
+                                        <TabsTrigger value="camera">Camera</TabsTrigger>
+                                        <TabsTrigger value="url">URL/Description</TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="camera">
+                                        {error && (
+                                            <Alert variant="destructive">
+                                                <AlertTitle>Erreur</AlertTitle>
+                                                <AlertDescription>{error}</AlertDescription>
+                                            </Alert>
+                                        )}
+                                        <Button onClick={captureImage} disabled={isLoading}>
+                                            {isLoading ? (
+                                                <Icons.spinner className="mr-2 h-4 w-4 animate-spin"/>
+                                            ) : (
+                                                <Camera className="mr-2 h-4 w-4"/>
+                                            )}
+                                            Identifier l'espèce par caméra
+                                        </Button>
+                                    </TabsContent>
+                                    <TabsContent value="url">
+                                        {error && (
+                                            <Alert variant="destructive">
+                                                <AlertTitle>Erreur</AlertTitle>
+                                                <AlertDescription>{error}</AlertDescription>
+                                            </Alert>
+                                        )}
+                                        <div className="grid gap-4">
+                                            <div>
+                                                <Input
+                                                    type="url"
+                                                    placeholder="URL de la photo"
+                                                    value={photoUrl || ''}
+                                                    onChange={(e) => setPhotoUrl(e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Textarea
+                                                    placeholder="Description du bonsaï"
+                                                    value={speciesDescription}
+                                                    onChange={(e) => setSpeciesDescription(e.target.value)}
+                                                />
+                                            </div>
+                                            <Button onClick={handleIdentifySpecies} disabled={isLoading}>
+                                                {isLoading ? (
+                                                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin"/>
+                                                ) : (
+                                                    <Icons.search className="mr-2 h-4 w-4"/>
+                                                )}
+                                                Identifier l'espèce
+                                            </Button>
+                                        </div>
+                                    </TabsContent>
+                                </Tabs>
                             </CardContent>
                         </Card>
                         {identificationResult && (
