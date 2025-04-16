@@ -11,7 +11,7 @@ import {
     Shield,
     Trash,
     User,
-    Camera // Ensure Camera is imported
+    Camera
 } from "lucide-react";
 
 import {useIsMobile} from "@/hooks/use-mobile"
@@ -278,8 +278,7 @@ export default function IndexPage() {
                                         <TabsTrigger value="url">URL/Description</TabsTrigger>
                                     </TabsList>
                                     <TabsContent value="camera">
-                                        <div className="flex items-center justify-between">
-                                            <CardDescription>Visualisez votre bonsaï avec votre caméra</CardDescription>
+                                        <CardDescription>Visualisez votre bonsaï avec votre caméra
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>
                                                     <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
@@ -316,7 +315,7 @@ export default function IndexPage() {
                                                     </AlertDialogFooter>
                                                 </AlertDialogContent>
                                             </AlertDialog>
-                                        </div>
+                                        </CardDescription>
                                         {!(hasCameraPermission) && (
                                             <Alert variant="destructive">
                                                 <AlertTitle>Accès à la caméra requis</AlertTitle>
@@ -402,29 +401,31 @@ export default function IndexPage() {
                                 </CardContent>
                             </Card>
                         )}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Suggestions de taille</CardTitle>
-                                <CardDescription>Obtenez des suggestions de taille personnalisées pour votre
-                                    bonsaï</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid gap-4">
-                                    <div>
-                                        <Textarea
-                                            placeholder="Quels sont vos objectifs pour le bonsaï (par exemple, mise en forme, santé) ?"
-                                            value={pruningGoals}
-                                            onChange={(e) => setPruningGoals(e.target.value)}
-                                        />
+                        {identificationResult && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Suggestions de taille</CardTitle>
+                                    <CardDescription>Obtenez des suggestions de taille personnalisées pour votre
+                                        bonsaï</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid gap-4">
+                                        <div>
+                                            <Textarea
+                                                placeholder="Quels sont vos objectifs pour le bonsaï (par exemple, mise en forme, santé) ?"
+                                                value={pruningGoals}
+                                                onChange={(e) => setPruningGoals(e.target.value)}
+                                            />
+                                        </div>
+                                        <Button onClick={handleSuggestPruning} disabled={isLoading}>
+                                            {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin"/> :
+                                                <Icons.plus className="mr-2 h-4 w-4"/>}
+                                            Suggérer une taille
+                                        </Button>
                                     </div>
-                                    <Button onClick={handleSuggestPruning} disabled={isLoading}>
-                                        {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin"/> :
-                                            <Icons.plus className="mr-2 h-4 w-4"/>}
-                                        Suggérer une taille
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        )}
                         {pruningSuggestions && (
                             <Card>
                                 <CardHeader>
