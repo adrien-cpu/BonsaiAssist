@@ -2,17 +2,15 @@
 
 import * as React from "react"
 import {
-    Check,
+    Camera,
     Home,
-    MessageSquare,
-    Plus,
     PlusCircle,
+    Search,
     Settings,
     Share2,
     Shield,
     Trash,
     User,
-    Camera
 } from "lucide-react";
 
 import {useIsMobile} from "@/hooks/use-mobile"
@@ -204,12 +202,10 @@ export default function IndexPage() {
                 <Sidebar collapsible="icon">
                     <SidebarContent>
                         <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton className="flex items-center">
-                                    <Home className="mr-2 h-4 w-4"/>
-                                    Toggle Sidebar
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
+                            <SidebarMenuButton className="flex items-center">
+                                <Home className="mr-2 h-4 w-4"/>
+                                Toggle Sidebar
+                            </SidebarMenuButton>
                         </SidebarMenu>
                         <SidebarSeparator/>
                         <SidebarHeader>
@@ -278,7 +274,7 @@ export default function IndexPage() {
                     </SidebarContent>
                     <SidebarRail/>
                 </Sidebar>
-                <SidebarInset className="flex flex-col">
+                <SidebarInset className="flex flex-col border-l">
                     <div className="container mx-auto p-4">
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
@@ -291,8 +287,10 @@ export default function IndexPage() {
                                         <TabsTrigger value="url">URL/Description</TabsTrigger>
                                     </TabsList>
                                     <TabsContent value="camera">
-                                        <CardDescription className="flex items-center justify-between">
-                                            Visualisez votre bonsaï avec votre caméra
+                                        <div className="flex items-center justify-between">
+                                            <CardDescription>
+                                                Visualisez votre bonsaï avec votre caméra
+                                            </CardDescription>
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>
                                                     <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
@@ -329,7 +327,7 @@ export default function IndexPage() {
                                                     </AlertDialogFooter>
                                                 </AlertDialogContent>
                                             </AlertDialog>
-                                        </CardDescription>
+                                        </div>
                                         {!(hasCameraPermission) && (
                                             <Alert variant="destructive">
                                                 <AlertTitle>Accès à la caméra requis</AlertTitle>
