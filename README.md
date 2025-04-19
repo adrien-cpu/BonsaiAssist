@@ -13,23 +13,31 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 - [x] Détection automatique de l'espèce via la caméra (analyse du tronc, feuilles, etc.).
   - L'utilisateur peut identifier l'espèce en fournissant une URL de photo et une description.
   - L'identification peut se faire également avec la caméra de l'appareil.
-- [ ] Identification des branches à tailler en fonction des objectifs de l'utilisateur.
+- [x] Identification des branches à tailler en fonction des objectifs de l'utilisateur.
 - [ ] Suggestions de soins selon la saison et l’état de l’arbre.
 
 ### 3.2. Assistance à la taille
-- [ ] Visualisation en **3D** des actions à effectuer (envisager l'intégration avec Unity).
+- [ ] Visualisation en **3D** des actions à effectuer (envisager l'intégration avec Unity). 
+- [ ] Envoie de données à Unity.
+- [ ] Gestion d'erreurs dans Unity.
 - [ ] Simulation avant/après pour évaluer l'impact des coupes.
 - [ ] Suivi des tailles précédentes et recommandations pour les sessions futures.
 
 ### 3.3. Gestion de l’arrosage et des soins
-- [ ] Notifications intelligentes en fonction de la météo et des besoins du bonsaï.
+- [ ] Notifications intelligentes en fonction de la météo et des besoins du bonsaï. 
+- [ ] Intégration de l'API Météo.
+- [x] Gestion de l'arrosage en fonction de l'espèce.
 - [ ] Système d’apprentissage basé sur les habitudes de l’utilisateur.
 - [ ] Conseils sur les engrais et traitements phytosanitaires.
 
 ### 3.4. Interaction avec l'utilisateur
-- [ ] Mode apprentissage : guides interactifs pour les débutants.
+- [ ] Mode apprentissage : guides interactifs pour les débutants. 
+- [ ] Interface du mode apprentissage.
 - [ ] Mode expert : options avancées pour les professionnels.
+- [ ] Interface du mode expert.
 - [ ] Chatbot IA pour répondre aux questions spécifiques.
+- [ ] Connection du chatbot.
+- [ ] Mise à jour de la base de connaissance du chatbot.
 
 ### 3.5. Intégration d’une IA évolutive
 - [ ] **IA exploratrice et prédictive** pour identifier de nouvelles techniques d’entretien.

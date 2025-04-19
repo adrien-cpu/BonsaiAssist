@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Coffee Grounds for Bonsai",
+    "category": "strengthening",
+    "explanation": "Coffee grounds are a good source of nitrogen and a beneficial fertilizer for bonsai.",
+    "ingredients": "Coffee grounds",
+    "quantity": "1 tablespoon",
+    "timing": "Every 2 months",
+    "why": "Nitrogen boosts the growth of the bonsai.",
+    "warnings": ""
+  },
+  {
+    "title": "Eggshells for Bonsai",
+    "category": "strengthening",
+    "explanation": "Eggshells provide calcium and improve soil quality.",
+    "ingredients": "Eggshells",
+    "quantity": "2 crushed eggshells",
+    "timing": "Every month",
+    "why": "Calcium helps the bonsai to be stronger.",
+    "warnings": ""
+  },
+  {
+    "title": "Detection of Yellow Leaves",
+    "category": "disease detection",
+    "explanation": "A yellow leaf can indicate an excess of water or a lack of nutrients.",
+    "ingredients": "None",
+    "quantity": "None",
+    "timing": "Always",
+    "why": "Yellow leaves are a symptom of a potential problem.",
+    "warnings": "Check the soil humidity before watering."
+  }
+]
