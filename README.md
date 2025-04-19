@@ -11,9 +11,9 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 
 ### 3.1. Reconnaissance et analyse des bonsaïs
 - [x] Détection automatique de l'espèce via la caméra (analyse du tronc, feuilles, etc.).
-  - L'utilisateur peut identifier l'espèce en fournissant une URL de photo et une description.
-  - L'identification peut se faire également avec la caméra de l'appareil.
-- [x] Identification des branches à tailler en fonction des objectifs de l'utilisateur.
+  - [x] L'utilisateur peut identifier l'espèce en fournissant une URL de photo et une description.
+  - [x] L'identification peut se faire également avec la caméra de l'appareil.
+- [ ] Identification des branches à tailler en fonction des objectifs de l'utilisateur.
 - [ ] Suggestions de soins selon la saison et l’état de l’arbre.
 
 ### 3.2. Assistance à la taille
@@ -26,7 +26,6 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 ### 3.3. Gestion de l’arrosage et des soins
 - [ ] Notifications intelligentes en fonction de la météo et des besoins du bonsaï. 
 - [ ] Intégration de l'API Météo.
-- [x] Gestion de l'arrosage en fonction de l'espèce.
 - [ ] Système d’apprentissage basé sur les habitudes de l’utilisateur.
 - [ ] Conseils sur les engrais et traitements phytosanitaires.
 
