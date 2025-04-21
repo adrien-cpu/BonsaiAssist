@@ -346,7 +346,7 @@ export default function IndexPage() {
                                             {isLoading ? (
                                                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin"/>
                                             ) : (
-                                                <Camera className="mr-2 h-4 w-4"/>
+                                                <Icons.camera className="mr-2 h-4 w-4"/>
                                             )}
                                             Identifier l'espèce par caméra
                                         </Button>
