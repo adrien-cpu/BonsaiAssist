@@ -73,3 +73,5 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 
 ## 7. Conclusion
 **BonsAIcut** est un projet ambitieux combinant IA et expertise horticole pour offrir un outil révolutionnaire d’aide à l’entretien des bonsaïs. Ce cahier des charges servira de base pour guider le développement et assurer le succès de l’application.
+
+Créez de magnifiques Bonsaïs quelle que soit votre expérience
