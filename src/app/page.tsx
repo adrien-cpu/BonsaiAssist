@@ -92,24 +92,33 @@ export default function IndexPage() {
     };
 
     const enableCamera = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({video: true});
-            setHasCameraPermission(true);
-            setIsCameraEnabled(true);
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-            }
-        } catch (err) {
-            console.error('Erreur lors de l\'accès à la caméra :', err);
-            setHasCameraPermission(false);
-            setIsCameraEnabled(false);
-            toast({
-                variant: 'destructive',
-                title: 'Accès à la caméra refusé',
-                description: 'Veuillez activer les autorisations de la caméra dans les paramètres de votre navigateur pour utiliser cette application.',
-            });
-        }
-    };
+      try {
+          const stream = await navigator.mediaDevices.getUserMedia({video: true});
+          setHasCameraPermission(true);
+          setIsCameraEnabled(true);
+          if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+          }
+      } catch (err: any) {
+          console.error('Erreur lors de l\'accès à la caméra :', err);
+          setHasCameraPermission(false);
+          setIsCameraEnabled(false);
+          if (err.name === "PermissionDeniedError" || err.name === "NotAllowedError") {
+              toast({
+                  variant: 'destructive',
+                  title: 'Accès à la caméra refusé',
+                  description: 'Veuillez activer les autorisations de la caméra dans les paramètres de votre navigateur pour utiliser cette application.',
+              });
+          } else {
+              toast({
+                  variant: 'destructive',
+                  title: 'Erreur de caméra',
+                  description: 'Une erreur s\'est produite lors de l\'accès à la caméra.',
+              });
+          }
+      }
+  };
+
 
     React.useEffect(() => {
         if (isCameraEnabled) {
@@ -291,49 +300,51 @@ export default function IndexPage() {
                                             <CardDescription>
                                                 Visualisez votre bonsaï avec votre caméra
                                             </CardDescription>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
-                                                        {isCameraEnabled ? (
-                                                            <>
-                                                                <Camera className="mr-2 h-4 w-4"/>
-                                                                Désactiver la caméra
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Camera className="mr-2 h-4 w-4"/>
-                                                                Activer la caméra
-                                                            </>
-                                                        )}
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Êtes-vous sûr de vouloir activer la caméra
-                                                            ?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            L'activation de la caméra permettra à l'application d'accéder à la
-                                                            caméra de votre appareil.
-                                                            Veuillez vous assurer que vous avez accordé les autorisations
-                                                            nécessaires.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel onClick={() => setOpen(false)}>Annuler</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => {
-                                                            enableCamera();
-                                                            setOpen(false);
-                                                        }}>Continuer</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
+                                          <AlertDialog>
+                                              <AlertDialogTrigger asChild>
+                                                  <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
+                                                      {isCameraEnabled ? (
+                                                          <>
+                                                              <Camera className="mr-2 h-4 w-4"/>
+                                                              Désactiver la caméra
+                                                          </>
+                                                      ) : (
+                                                          <>
+                                                              <Camera className="mr-2 h-4 w-4"/>
+                                                              Activer la caméra
+                                                          </>
+                                                      )}
+                                                  </Button>
+                                              </AlertDialogTrigger>
+                                              <AlertDialogContent>
+                                                  <AlertDialogHeader>
+                                                      <AlertDialogTitle>Êtes-vous sûr de vouloir activer la caméra
+                                                          ?</AlertDialogTitle>
+                                                      <AlertDialogDescription>
+                                                          L'activation de la caméra permettra à l'application d'accéder à la
+                                                          caméra de votre appareil.
+                                                          Veuillez vous assurer que vous avez accordé les autorisations
+                                                          nécessaires.
+                                                      </AlertDialogDescription>
+                                                  </AlertDialogHeader>
+                                                  <AlertDialogFooter>
+                                                      <AlertDialogCancel onClick={() => setOpen(false)}>Annuler</AlertDialogCancel>
+                                                      <AlertDialogAction onClick={() => {
+                                                          enableCamera();
+                                                          setOpen(false);
+                                                      }}>Continuer</AlertDialogAction>
+                                                  </AlertDialogFooter>
+                                              </AlertDialogContent>
+                                          </AlertDialog>
                                         </div>
-                                        <Alert variant="destructive">
-                                            <AlertTitle>Accès à la caméra requis</AlertTitle>
-                                            <AlertDescription>
-                                                Veuillez autoriser l'accès à la caméra pour utiliser cette fonctionnalité.
-                                            </AlertDescription>
-                                        </Alert>
+                                        {hasCameraPermission ? null : (
+                                            <Alert variant="destructive">
+                                                <AlertTitle>Accès à la caméra requis</AlertTitle>
+                                                <AlertDescription>
+                                                    Veuillez autoriser l'accès à la caméra pour utiliser cette fonctionnalité.
+                                                </AlertDescription>
+                                            </Alert>
+                                        )}
                                         <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
                                         <canvas ref={canvasRef} style={{display: 'none'}}/>
                                         {error && (
