@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Provides pruning suggestions based on the identified bonsai species and user's goals.
@@ -49,8 +50,9 @@ User Goals: {{{userGoals}}}
 Tree Structure: {{{treeStructure}}}
 Description of Bonsai: {{{bonsaiDescription}}}
 
-Pruning Suggestions:
-Branch Identifications:`,
+Pruning Suggestions: Provide detailed pruning actions to be taken, including specific locations of cuts to make, techniques for shaping the tree, and consider aesthetics.
+Branch Identifications: Provide a numbered list of specific branches that should be pruned.
+`,
 });
 
 const suggestPruningFlow = ai.defineFlow<
