@@ -14,7 +14,7 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
   - [x] L'utilisateur peut identifier l'espèce en fournissant une URL de photo et une description.
   - [x] L'identification peut se faire également avec la caméra de l'appareil.
 - [x] Identification des branches à tailler en fonction des objectifs de l'utilisateur.
-- [ ] Suggestions de soins selon la saison et l’état de l’arbre.
+- [x] Suggestions de soins selon la saison et l’état de l’arbre.
 
 ### 3.2. Assistance à la taille
 - [ ] Visualisation en **3D** des actions à effectuer.
