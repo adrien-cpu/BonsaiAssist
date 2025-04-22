@@ -4,7 +4,7 @@
  *
  * - identifySpecies - A function that handles the species identification process.
  * - IdentifySpeciesInput - The input type for the identifySpecies function.
- * - IdentifySpeciesOutput - The return type for the identifySpecies function.
+ * - IdentifySpeciesOutput - The return type for the IdentifySpecies function.
  */
 
 import {ai} from '@/ai/ai-instance';
@@ -62,7 +62,9 @@ const identifySpeciesFlow = ai.defineFlow<
     outputSchema: IdentifySpeciesOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    // Remove "data:" prefix from photoUrl
+    const cleanedPhotoUrl = input.photoUrl.replace(/^data:[^;]+;base64,/, '');
+    const {output} = await prompt({...input, photoUrl: cleanedPhotoUrl});
     return output!;
   }
 );
