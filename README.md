@@ -22,7 +22,7 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 - [ ] Suivi des tailles précédentes et recommandations pour les sessions futures.
 
 ### 3.3. Gestion de l’arrosage et des soins
-- [ ] Notifications intelligentes en fonction de la météo et des besoins du bonsaï.
+- [x] Notifications intelligentes en fonction de la météo et des besoins du bonsaï.
 - [ ] Système d’apprentissage basé sur les habitudes de l’utilisateur.
 - [ ] Conseils sur les engrais et traitements phytosanitaires.
 

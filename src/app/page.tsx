@@ -63,6 +63,7 @@ import {useState} from "react";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger} from "@/components/ui/alert-dialog";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {suggestCare, SuggestCareOutput} from "@/ai/flows/suggest-care";
 
 export default function IndexPage() {
     const [speciesDescription, setSpeciesDescription] = React.useState('');
@@ -76,7 +77,11 @@ export default function IndexPage() {
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
     const [hasCameraPermission, setHasCameraPermission] = React.useState(false);
     const [isCameraEnabled, setIsCameraEnabled] = useState(false);
-    const [open, setOpen] = React.useState(false)
+    const [open, setOpen] = React.useState(false);
+    const [treeStructure, setTreeStructure] = useState('');
+    const [careSuggestions, setCareSuggestions] = React.useState<SuggestCareOutput | null>(null);
+    const [currentSeason, setCurrentSeason] = useState('');
+    const [treeHealth, setTreeHealth] = useState('');
 
     const toggleCamera = async () => {
         if (!isCameraEnabled) {
@@ -196,6 +201,7 @@ export default function IndexPage() {
                 species: identificationResult.species,
                 userGoals: pruningGoals,
                 bonsaiDescription: speciesDescription,
+                treeStructure: treeStructure,
             });
             setPruningSuggestions(result);
         } catch (err) {
@@ -203,6 +209,26 @@ export default function IndexPage() {
             setError('Échec de la suggestion de taille. Veuillez vérifier les entrées et réessayer.');
         }
         setIsLoading(false);
+    };
+    const handleSuggestCare = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        if (!identificationResult?.species) {
+          setError('Veuillez identifier l\'espèce avant de demander des suggestions de soins.');
+          return;
+        }
+        const result = await suggestCare({
+          species: identificationResult.species,
+          currentSeason: currentSeason,
+          treeHealth: treeHealth,
+        });
+        setCareSuggestions(result);
+      } catch (err) {
+        console.error('Erreur lors de la suggestion de soins :', err);
+        setError('Échec de la suggestion de soins. Veuillez vérifier les entrées et réessayer.');
+      }
+      setIsLoading(false);
     };
 
     return (
@@ -300,42 +326,42 @@ export default function IndexPage() {
                                             <CardDescription>
                                                 Visualisez votre bonsaï avec votre caméra
                                             </CardDescription>
-                                          <AlertDialog>
-                                              <AlertDialogTrigger asChild>
-                                                  <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
-                                                      {isCameraEnabled ? (
-                                                          <>
-                                                              <Camera className="mr-2 h-4 w-4"/>
-                                                              Désactiver la caméra
-                                                          </>
-                                                      ) : (
-                                                          <>
-                                                              <Camera className="mr-2 h-4 w-4"/>
-                                                              Activer la caméra
-                                                          </>
-                                                      )}
-                                                  </Button>
-                                              </AlertDialogTrigger>
-                                              <AlertDialogContent>
-                                                  <AlertDialogHeader>
-                                                      <AlertDialogTitle>Êtes-vous sûr de vouloir activer la caméra
-                                                          ?</AlertDialogTitle>
-                                                      <AlertDialogDescription>
-                                                          L'activation de la caméra permettra à l'application d'accéder à la
-                                                          caméra de votre appareil.
-                                                          Veuillez vous assurer que vous avez accordé les autorisations
-                                                          nécessaires.
-                                                      </AlertDialogDescription>
-                                                  </AlertDialogHeader>
-                                                  <AlertDialogFooter>
-                                                      <AlertDialogCancel onClick={() => setOpen(false)}>Annuler</AlertDialogCancel>
-                                                      <AlertDialogAction onClick={() => {
-                                                          enableCamera();
-                                                          setOpen(false);
-                                                      }}>Continuer</AlertDialogAction>
-                                                  </AlertDialogFooter>
-                                              </AlertDialogContent>
-                                          </AlertDialog>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="outline" disabled={isLoading} onClick={toggleCamera}>
+                                                        {isCameraEnabled ? (
+                                                            <>
+                                                                <Camera className="mr-2 h-4 w-4"/>
+                                                                Désactiver la caméra
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Camera className="mr-2 h-4 w-4"/>
+                                                                Activer la caméra
+                                                            </>
+                                                        )}
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Êtes-vous sûr de vouloir activer la caméra
+                                                            ?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            L'activation de la caméra permettra à l'application d'accéder à la
+                                                            caméra de votre appareil.
+                                                            Veuillez vous assurer que vous avez accordé les autorisations
+                                                            nécessaires.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel onClick={() => setOpen(false)}>Annuler</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => {
+                                                            enableCamera();
+                                                            setOpen(false);
+                                                        }}>Continuer</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                         {hasCameraPermission ? null : (
                                             <Alert variant="destructive">
@@ -433,6 +459,13 @@ export default function IndexPage() {
                                     <div className="grid gap-4">
                                         <div>
                                             <Textarea
+                                                placeholder="Description de la structure de l'arbre et du placement des branches"
+                                                value={treeStructure}
+                                                onChange={(e) => setTreeStructure(e.target.value)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <Textarea
                                                 placeholder="Quels sont vos objectifs pour le bonsaï (par exemple, mise en forme, santé) ?"
                                                 value={pruningGoals}
                                                 onChange={(e) => setPruningGoals(e.target.value)}
@@ -456,9 +489,53 @@ export default function IndexPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p>{pruningSuggestions.pruningSuggestions}</p>
+                                    <p>{pruningSuggestions.branchIdentifications}</p>
                                 </CardContent>
                             </Card>
                         )}
+                      {identificationResult && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Suggestions de soins</CardTitle>
+                            <CardDescription>Obtenez des suggestions de soins personnalisées pour votre bonsaï</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid gap-4">
+                              <div>
+                                <Input
+                                  type="text"
+                                  placeholder="Saison actuelle"
+                                  value={currentSeason}
+                                  onChange={(e) => setCurrentSeason(e.target.value)}
+                                />
+                              </div>
+                              <div>
+                                <Textarea
+                                  placeholder="État de santé de l'arbre"
+                                  value={treeHealth}
+                                  onChange={(e) => setTreeHealth(e.target.value)}
+                                />
+                              </div>
+                              <Button onClick={handleSuggestCare} disabled={isLoading}>
+                                {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /> :
+                                  <Icons.plus className="mr-2 h-4 w-4" />}
+                                Suggérer des soins
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                      {careSuggestions && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Suggestions de soins</CardTitle>
+                            <CardDescription>Voici les suggestions de soins en fonction de la saison et de l'état de santé de votre bonsaï</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <p>{careSuggestions.careSuggestions}</p>
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
                 </SidebarInset>
             </SidebarProvider>
