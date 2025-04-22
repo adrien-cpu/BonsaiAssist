@@ -1,7 +1,7 @@
 # BonsAIcut
 
 ## 1. Présentation du projet
-**Nom du projet** : BonsAIcut  
+**Nom du projet** : BonsAIcut
 **Objectif** : Développer une application assistée par intelligence artificielle permettant aux utilisateurs de tailler et entretenir leurs bonsaïs avec précision.
 
 ## 2. Contexte et justification
@@ -11,13 +11,11 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 
 ### 3.1. Reconnaissance et analyse des bonsaïs
 - [x] Détection automatique de l'espèce via la caméra (analyse du tronc, feuilles, etc.).
-  - [x] L'utilisateur peut identifier l'espèce en fournissant une URL de photo et une description.
-  - [x] L'identification peut se faire également avec la caméra de l'appareil.
 - [x] Identification des branches à tailler en fonction des objectifs de l'utilisateur.
-- [x] Suggestions de soins selon la saison et l’état de l’arbre.
+- [x] Suggestions de soins selon la saison et l'état de l’arbre.
 
 ### 3.2. Assistance à la taille
-- [ ] Visualisation en **3D** des actions à effectuer.
+- [x] Visualisation en **3D** des actions à effectuer.
 - [ ] Simulation avant/après pour évaluer l'impact des coupes.
 - [ ] Suivi des tailles précédentes et recommandations pour les sessions futures.
 
@@ -27,7 +25,7 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 - [ ] Conseils sur les engrais et traitements phytosanitaires.
 
 ### 3.4. Interaction avec l'utilisateur
-- [ ] Mode apprentissage : guides interactifs pour les débutants.
+- [x] Mode apprentissage : guides interactifs pour les débutants.
 - [ ] Mode expert : options avancées pour les professionnels.
 - [ ] Chatbot IA pour répondre aux questions spécifiques.
 
