@@ -14,7 +14,7 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
   - [x] L'utilisateur peut identifier l'espèce en fournissant une URL de photo et une description.
   - [x] L'identification peut se faire également avec la caméra de l'appareil.
 - [ ] Identification des branches à tailler en fonction des objectifs de l'utilisateur.
-- [ ] Suggestions de soins selon la saison et l'état de l’arbre.
+- [ ] Suggestions de soins selon la saison et l’état de l’arbre.
 
 ### 3.2. Assistance à la taille
 - [ ] Visualisation en **3D** des actions à effectuer.
@@ -22,12 +22,12 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 - [ ] Suivi des tailles précédentes et recommandations pour les sessions futures.
 
 ### 3.3. Gestion de l’arrosage et des soins
-- [x] Notifications intelligentes en fonction de la météo et des besoins du bonsaï.
+- [ ] Notifications intelligentes en fonction de la météo et des besoins du bonsaï.
 - [ ] Système d’apprentissage basé sur les habitudes de l’utilisateur.
 - [ ] Conseils sur les engrais et traitements phytosanitaires.
 
 ### 3.4. Interaction avec l'utilisateur
-- [x] Mode apprentissage : guides interactifs pour les débutants.
+- [ ] Mode apprentissage : guides interactifs pour les débutants.
 - [ ] Mode expert : options avancées pour les professionnels.
 - [ ] Chatbot IA pour répondre aux questions spécifiques.
 
