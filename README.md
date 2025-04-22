@@ -25,7 +25,7 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 - [ ] Conseils sur les engrais et traitements phytosanitaires.
 
 ### 3.4. Interaction avec l'utilisateur
-- [x] Mode apprentissage : guides interactifs pour les débutants.
+- [ ] Mode apprentissage : guides interactifs pour les débutants.
 - [ ] Mode expert : options avancées pour les professionnels.
 - [ ] Chatbot IA pour répondre aux questions spécifiques.
 

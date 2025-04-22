@@ -325,6 +325,14 @@ export default function IndexPage() {
                                         <div className="flex items-center justify-between">
                                             <CardDescription>
                                                 Visualisez votre bonsaï avec votre caméra
+                                                {hasCameraPermission ? null : (
+                                                    <Alert variant="destructive">
+                                                        <AlertTitle>Accès à la caméra requis</AlertTitle>
+                                                        <AlertDescription>
+                                                            Veuillez autoriser l'accès à la caméra pour utiliser cette fonctionnalité.
+                                                        </AlertDescription>
+                                                    </Alert>
+                                                )}
                                             </CardDescription>
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>
@@ -363,14 +371,7 @@ export default function IndexPage() {
                                                 </AlertDialogContent>
                                             </AlertDialog>
                                         </div>
-                                        {hasCameraPermission ? null : (
-                                            <Alert variant="destructive">
-                                                <AlertTitle>Accès à la caméra requis</AlertTitle>
-                                                <AlertDescription>
-                                                    Veuillez autoriser l'accès à la caméra pour utiliser cette fonctionnalité.
-                                                </AlertDescription>
-                                            </Alert>
-                                        )}
+
                                         <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted/>
                                         <canvas ref={canvasRef} style={{display: 'none'}}/>
                                         {error && (
