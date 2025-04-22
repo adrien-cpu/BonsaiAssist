@@ -15,7 +15,7 @@ L'entretien des bonsaïs demande des connaissances avancées sur la taille, l'ar
 - [x] Suggestions de soins selon la saison et l'état de l’arbre.
 
 ### 3.2. Assistance à la taille
-- [x] Visualisation en **3D** des actions à effectuer.
+- [ ] Visualisation en **3D** des actions à effectuer.
 - [ ] Simulation avant/après pour évaluer l'impact des coupes.
 - [ ] Suivi des tailles précédentes et recommandations pour les sessions futures.
 
