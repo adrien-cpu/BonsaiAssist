@@ -1,3 +1,4 @@
+
 [
   {
     "species": "Acer palmatum",
@@ -10,12 +11,12 @@
     "weatherAdjustments": {
       "rainy": "Réduire l'arrosage",
       "hot": "Augmenter l'arrosage",
-      "winter": "Arroser seulement quand la terre est sèche"
-    ,"coldThreshold": 15,
+      "winter": "Arroser seulement quand la terre est sèche",
+      "coldThreshold": 15,
       "hotThreshold": 25
     },
     "optimalBrightness": { "min": 4000, "max": 8000 },
-    
+
     "soilMoisture": { "min": 40, "max": 70 },
     "additionalCare": "Protéger du soleil direct en été, tailler au printemps et en automne."
   },
@@ -26,14 +27,14 @@
     "scientificName": "Ficus retusa",
     "commonName": "Ficus Ginseng",
     "wateringFrequency": "Tous les 3-4 jours",
-    "wateringAmount": "0.5 litre",    
+    "wateringAmount": "0.5 litre",
     "weatherAdjustments": {
       "rainy": "Vérifier l'humidité du sol avant d'arroser",
       "hot": "Augmenter l'arrosage",
       "winter": "Arroser moins souvent",
      "coldThreshold": 18,
-      "hotThreshold": 30,
-    },    
+      "hotThreshold": 30
+    },
 
     "optimalBrightness": { "min": 2000, "max": 6000 },
     "soilMoisture": { "min": 30, "max": 60 },
@@ -46,14 +47,14 @@
     "scientificName": "Pinus thunbergii",
     "commonName": "Pin noir du Japon",
     "wateringFrequency": "Tous les 2-4 jours",
-    "wateringAmount": "1.5 litre",    
+    "wateringAmount": "1.5 litre",
     "weatherAdjustments": {
       "rainy": "Laisser le sol sécher entre deux arrosages",
       "hot": "Arroser abondamment en matinée ou en soirée",
       "winter": "Réduire l'arrosage, protéger des gels",
      "coldThreshold": 10,
-      "hotThreshold": 25,
-    },    
+      "hotThreshold": 25
+    },
 
     "optimalBrightness": { "min": 6000, "max": 10000 },
     "soilMoisture": { "min": 40, "max": 70 },
@@ -72,8 +73,8 @@
       "hot": "Arroser plus fréquemment",
       "winter": "Protéger des gels extrêmes",
      "coldThreshold": 5,
-      "hotThreshold": 25,
-    },    
+      "hotThreshold": 25
+    },
 
     "optimalBrightness": { "min": 6000, "max": 10000 },
     "soilMoisture": { "min": 40, "max": 70 },
@@ -92,8 +93,8 @@
       "hot": "Arroser abondamment",
       "winter": "Maintenir un sol légèrement humide",
      "coldThreshold": 18,
-      "hotThreshold": 30,
-    },    
+      "hotThreshold": 30
+    },
 
     "optimalBrightness": { "min": 3000, "max": 7000 },
     "soilMoisture": { "min": 50, "max": 70 },
