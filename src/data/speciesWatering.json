@@ -1,38 +1,40 @@
 [
   {
-    "scientificName": "Acer palmatum",
-    "commonName": "Érable du Japon",
-    "wateringFrequency": "Tous les 2-3 jours",
-    "wateringAmount": "1 litre",
-    "optimalHumidity": { "min": 40, "max": 60 },
-    "optimalTemperature": { "min": 15, "max": 25 },
+    "species": "Acer palmatum",
     "scientificName": "Acer palmatum",
     "commonName": "Érable japonais",
     "wateringFrequency": "Tous les 2-3 jours",
     "wateringAmount": "1 litre",
+    "optimalHumidity": { "min": 40, "max": 60 },
+    "optimalTemperature": { "min": 15, "max": 25 },
     "weatherAdjustments": {
       "rainy": "Réduire l'arrosage",
       "hot": "Augmenter l'arrosage",
       "winter": "Arroser seulement quand la terre est sèche"
+    ,"coldThreshold": 15,
+      "hotThreshold": 25
     },
     "optimalBrightness": { "min": 4000, "max": 8000 },
+    
     "soilMoisture": { "min": 40, "max": 70 },
     "additionalCare": "Protéger du soleil direct en été, tailler au printemps et en automne."
   },
   {
     "optimalHumidity": { "min": 50, "max": 70 },
     "optimalTemperature": { "min": 18, "max": 30 },
+    "species": "Ficus retusa",
     "scientificName": "Ficus retusa",
     "commonName": "Ficus Ginseng",
     "wateringFrequency": "Tous les 3-4 jours",
-    "commonName": "Ficus Ginseng",
-    "wateringFrequency": "Tous les 3-4 jours",
-    "wateringAmount": "0.5 litre",
+    "wateringAmount": "0.5 litre",    
     "weatherAdjustments": {
       "rainy": "Vérifier l'humidité du sol avant d'arroser",
       "hot": "Augmenter l'arrosage",
-      "winter": "Arroser moins souvent"
-    },
+      "winter": "Arroser moins souvent",
+     "coldThreshold": 18,
+      "hotThreshold": 30,
+    },    
+
     "optimalBrightness": { "min": 2000, "max": 6000 },
     "soilMoisture": { "min": 30, "max": 60 },
     "additionalCare": "Peut être cultivé en intérieur, tailler régulièrement pour maintenir la forme."
@@ -40,22 +42,25 @@
   {
     "optimalHumidity": { "min": 30, "max": 50 },
     "optimalTemperature": { "min": 10, "max": 25 },
+    "species": "Pinus thunbergii",
     "scientificName": "Pinus thunbergii",
-    "scientificName": "Pinus thunbergii",
-    "commonName": "Pin noir du Japon",
     "commonName": "Pin noir du Japon",
     "wateringFrequency": "Tous les 2-4 jours",
-    "wateringAmount": "1.5 litre",
+    "wateringAmount": "1.5 litre",    
     "weatherAdjustments": {
       "rainy": "Laisser le sol sécher entre deux arrosages",
       "hot": "Arroser abondamment en matinée ou en soirée",
-      "winter": "Réduire l'arrosage, protéger des gels"
-    },
+      "winter": "Réduire l'arrosage, protéger des gels",
+     "coldThreshold": 10,
+      "hotThreshold": 25,
+    },    
+
     "optimalBrightness": { "min": 6000, "max": 10000 },
     "soilMoisture": { "min": 40, "max": 70 },
     "additionalCare": "Nécessite beaucoup de lumière, tailler les nouvelles pousses au printemps."
   },
   {
+    "species": "Juniperus procumbens",
     "scientificName": "Juniperus procumbens",
     "commonName": "Genévrier rampant",
     "wateringFrequency": "Tous les 2-3 jours",
@@ -65,13 +70,17 @@
     "weatherAdjustments": {
       "rainy": "Réduire l'arrosage",
       "hot": "Arroser plus fréquemment",
-      "winter": "Protéger des gels extrêmes"
-    },
+      "winter": "Protéger des gels extrêmes",
+     "coldThreshold": 5,
+      "hotThreshold": 25,
+    },    
+
     "optimalBrightness": { "min": 6000, "max": 10000 },
     "soilMoisture": { "min": 40, "max": 70 },
     "additionalCare": "Exposition plein soleil, ne pas laisser le sol s'assécher complètement."
   },
   {
+    "species": "Carmona retusa",
     "scientificName": "Carmona retusa",
     "commonName": "Carmona à petites feuilles",
     "wateringFrequency": "Tous les 1-2 jours",
@@ -81,8 +90,11 @@
     "weatherAdjustments": {
       "rainy": "Réduire l'arrosage",
       "hot": "Arroser abondamment",
-      "winter": "Maintenir un sol légèrement humide"
-    },
+      "winter": "Maintenir un sol légèrement humide",
+     "coldThreshold": 18,
+      "hotThreshold": 30,
+    },    
+
     "optimalBrightness": { "min": 3000, "max": 7000 },
     "soilMoisture": { "min": 50, "max": 70 },
     "additionalCare": "Nécessite beaucoup de lumière, tailler les nouvelles pousses au printemps."

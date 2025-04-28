@@ -11,10 +11,20 @@ export interface SpeciesData {
   commonName: string;
   wateringFrequency: string;
   wateringAmount: string;
-  weatherAdjustments: object;
+  weatherAdjustments: {
+    rainy: string;
+    hot: string;
+    winter: string;
+    coldThreshold: number;
+    hotThreshold: number;
+  };
   additionalCare: string;
 }
 
-export const getSpeciesData = (): SpeciesData[] => {
+export const getSpeciesWateringData = (): SpeciesData[] => {
   return speciesData as SpeciesData[];
 }
+
+
+
+

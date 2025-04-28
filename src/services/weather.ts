@@ -1,4 +1,4 @@
-import { getSpeciesWateringData } from '@/lib/utils';
+import { SpeciesData, getSpeciesWateringData } from '@/lib/utils';
 
 const API_KEY = process.env.OPENWEATHERMAP_API_KEY;
 const API_BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
@@ -53,7 +53,7 @@ export async function getWeather(city: string, bonsaiSpecies: string): Promise<W
   }
 }
 
-function parseWeatherData(data: any, bonsaiData: any): Weather {
+function parseWeatherData(data: unknown, bonsaiData: SpeciesData | undefined): Weather {
   if (!data || !data.main || !data.weather || data.weather.length === 0) {
     throw new Error('Invalid weather data format');
   }
@@ -63,10 +63,10 @@ function parseWeatherData(data: any, bonsaiData: any): Weather {
 
   if(bonsaiData){
     const weatherAdjustments = bonsaiData.weatherAdjustments
-    if(temperatureCelsius < weatherAdjustments.coldThreshold){
+    if(weatherAdjustments.coldThreshold && temperatureCelsius < weatherAdjustments.coldThreshold){
       conditions = conditions + " It's too cold for the " + bonsaiData.commonName + " you might want to put it inside."
     }
-    if(temperatureCelsius > weatherAdjustments.hotThreshold){
+    if(weatherAdjustments.hotThreshold && temperatureCelsius > weatherAdjustments.hotThreshold){
       conditions = conditions + " It's too hot for the " + bonsaiData.commonName + " you might want to put it in the shade."
     }
   }
