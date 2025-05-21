@@ -49,7 +49,7 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Textarea} from '@/components/ui/textarea';
 import {toast} from '@/hooks/use-toast';
 import {
-  Camera,
+  Camera, CircleDotDashed,
   Home,
   PlusCircle,
   Settings,
@@ -59,10 +59,8 @@ import {
   User,
 } from 'lucide-react';
 import * as React from 'react';
-import {useRef, useState} from 'react';
-import type {Unity, UnityConfig} from 'react-unity-webgl';
-import {UnityProvider, useUnityContext} from 'react-unity-webgl';
-
+import { useEffect, useRef, useState} from 'react';
+import * as UnityWebGL from 'react-unity-webgl';
 const unityConfig: UnityConfig = {
   loaderUrl: '/unity/bonsai_build.loader.js',
   dataUrl: '/unity/bonsai_build.data',
@@ -96,20 +94,23 @@ export default function IndexPage() {
   const {
     unityProvider,
     isLoaded,
-    sendMessage,
+    loadingErrorCode, sendMessage,
     addEventListener,
     removeEventListener,
-  } = useUnityContext(unityConfig);
+  } = UnityWebGL.useUnityContext(unityConfig);
 
   // Callback pour gérer les messages venant d'Unity
-  const handleUnityEvent = React.useCallback((eventName: string, data: any) => {
-    console.log('Événement Unity reçu:', eventName, data);
+  const handleUnityEvent = React.useCallback((...parameters: UnityWebGL.ReactUnityEventParameter[]) => {
+    // The first parameter is usually the event name, followed by data
+    const eventName = parameters[0] as string;
+    const data = parameters.slice(1);
+    console.log('Événement Unity reçu:', eventName, ...data);
     // Traiter les événements spécifiques venant d'Unity si nécessaire
   }, []);
 
   React.useEffect(() => {
     addEventListener('BonsaiLoaded', handleUnityEvent);
-    addEventListener('PruningApplied', handleUnityEvent);
+    addEventListener('PruningApplied', handleUnityEvent); // Assuming PruningApplied also sends data
     return () => {
       removeEventListener('BonsaiLoaded', handleUnityEvent);
       removeEventListener('PruningApplied', handleUnityEvent);
@@ -250,7 +251,8 @@ export default function IndexPage() {
       }
 
       const result = await identifySpecies({
-        photoDataUri: urlToUse,
+        // The AI model expects photoUrl, not photoDataUri
+        photoUrl: urlToUse,
         description: speciesDescription,
       });
       setIdentificationResult(result); // Met à jour l'état avec le résultat
@@ -350,7 +352,7 @@ export default function IndexPage() {
               <SidebarMenuItem>
                 <SidebarMenuButton className="flex items-center">
                   <Share2 className="mr-2 h-4 w-4" />
-                  Visualisation 3D
+                  Visualisation et Taille
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -713,9 +715,9 @@ export default function IndexPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="aspect-video">
-                    <Unity
-                      unityProvider={unityProvider}
+                  <div className="aspect-video border rounded-md overflow-hidden">
+                    <UnityWebGL.Unity
+                      unityProvider={unityProvider as any}
                       style={{width: '100%', height: '100%'}}
                     />
                   </div>
@@ -733,6 +735,9 @@ export default function IndexPage() {
                  <CardHeader>
                    <CardTitle>Visualisation 3D</CardTitle>
                  </CardHeader>
+                 {loadingErrorCode && (
+                  <Alert variant="destructive">Error loading Unity: {loadingErrorCode}</Alert>
+                 )}
                  <CardContent>
                    <p>Chargement de la visualisation 3D...</p>
                  </CardContent>
