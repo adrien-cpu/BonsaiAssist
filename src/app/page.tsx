@@ -1,67 +1,72 @@
 "use client";
 
-import type {IdentifySpeciesOutput} from '@/ai/flows/identify-species';
-import {identifySpecies} from '@/ai/flows/identify-species';
-import type {SuggestCareOutput} from '@/ai/flows/suggest-care';
-import {suggestCare} from '@/ai/flows/suggest-care';
-import type {SuggestPruningOutput} from '@/ai/flows/suggest-pruning';
-import {suggestPruning} from '@/ai/flows/suggest-pruning';
-import {Icons} from '@/components/icons';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
-import {Button} from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {Input} from '@/components/ui/input';
-import {Label} from '@/components/ui/label';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-} from '@/components/ui/sidebar';
-import {Switch} from '@/components/ui/switch';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {Textarea} from '@/components/ui/textarea';
-import {toast} from '@/hooks/use-toast';
-import {
-  Camera, CircleDotDashed,
-  Home,
-  PlusCircle,
-  Settings,
-  Share2,
-  Shield,
-  Trash,
-  User,
-} from 'lucide-react';
-import * as React from 'react';
-import { useEffect, useRef, useState} from 'react';
+import { useState, useEffect } from 'react';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { Navigation } from '@/components/layout/navigation';
+import { DashboardStats } from '@/components/bonsai/dashboard-stats';
+import { CareCalendar } from '@/components/bonsai/care-calendar';
+import { WeatherWidget } from '@/components/bonsai/weather-widget';
+import { PruningGuide } from '@/components/bonsai/pruning-guide';
+import { SpeciesCard } from '@/components/bonsai/species-card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Icons } from '@/components/icons';
+import { useBonsaiData } from '@/hooks/use-bonsai-data';
+import { useWeather } from '@/hooks/use-weather';
+import { identifySpecies, type IdentifySpeciesOutput } from '@/ai/flows/identify-species';
+import { suggestPruning, type SuggestPruningOutput } from '@/ai/flows/suggest-pruning';
+import { suggestCare, type SuggestCareOutput } from '@/ai/flows/suggest-care';
+import { BonsaiSpecies, CareReminder } from '@/types';
+import { toast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 import * as UnityWebGL from 'react-unity-webgl';
-const unityConfig: UnityConfig = {
+
+// Mock species data
+const mockSpecies: BonsaiSpecies[] = [
+  {
+    id: '1',
+    scientificName: 'Acer palmatum',
+    commonName: 'Érable japonais',
+    family: 'Aceraceae',
+    characteristics: ['Feuilles palmées', 'Couleurs automnales spectaculaires', 'Croissance modérée'],
+    careLevel: 'intermediate',
+    growthRate: 'medium',
+    lightRequirements: 'medium',
+    wateringFrequency: 'Tous les 2-3 jours',
+    optimalTemperature: { min: 15, max: 25 },
+    optimalHumidity: { min: 40, max: 60 },
+    soilType: 'Bien drainé, légèrement acide',
+    fertilizer: 'Engrais équilibré au printemps',
+    pruningSeasons: ['Printemps', 'Automne'],
+    commonIssues: ['Brûlure des feuilles', 'Pucerons'],
+    tips: ['Protéger du soleil direct en été', 'Arroser régulièrement mais sans excès'],
+  },
+  {
+    id: '2',
+    scientificName: 'Ficus retusa',
+    commonName: 'Ficus Ginseng',
+    family: 'Moraceae',
+    characteristics: ['Racines aériennes', 'Feuilles persistantes', 'Très résistant'],
+    careLevel: 'beginner',
+    growthRate: 'fast',
+    lightRequirements: 'medium',
+    wateringFrequency: 'Tous les 3-4 jours',
+    optimalTemperature: { min: 18, max: 30 },
+    optimalHumidity: { min: 50, max: 70 },
+    soilType: 'Terreau universel bien drainé',
+    fertilizer: 'Engrais liquide mensuel',
+    pruningSeasons: ['Toute l\'année'],
+    commonIssues: ['Chute des feuilles', 'Cochenilles'],
+    tips: ['Peut être cultivé en intérieur', 'Tailler régulièrement pour maintenir la forme'],
+  },
+];
+
+const unityConfig = {
   loaderUrl: '/unity/bonsai_build.loader.js',
   dataUrl: '/unity/bonsai_build.data',
   frameworkUrl: '/unity/bonsai_build.framework.js',
@@ -69,684 +74,588 @@ const unityConfig: UnityConfig = {
 };
 
 export default function IndexPage() {
-  const [speciesDescription, setSpeciesDescription] = useState('');
-  const [identificationResult, setIdentificationResult] =
-    React.useState<IdentifySpeciesOutput | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [pruningGoals, setPruningGoals] = React.useState('');
-  const [pruningSuggestions, setPruningSuggestions] =
-    React.useState<SuggestPruningOutput | null>(null);
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Identification states
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [hasCameraPermission, setHasCameraPermission] = React.useState(false);
-  const [isCameraEnabled, setIsCameraEnabled] = useState(false);
+  const [speciesDescription, setSpeciesDescription] = useState('');
+  const [identificationResult, setIdentificationResult] = useState<IdentifySpeciesOutput | null>(null);
+  
+  // Pruning states
+  const [pruningGoals, setPruningGoals] = useState('');
   const [treeStructure, setTreeStructure] = useState('');
-  const [careSuggestions, setCareSuggestions] =
-    React.useState<SuggestCareOutput | null>(null);
+  const [pruningSuggestions, setPruningSuggestions] = useState<SuggestPruningOutput | null>(null);
+  
+  // Care states
   const [currentSeason, setCurrentSeason] = useState('');
   const [treeHealth, setTreeHealth] = useState('');
-  const [rememberCameraChoice, setRememberCameraChoice] = useState(false); // Nouvel état pour la case à cocher
-  const [isCameraConfirmationOpen, setIsCameraConfirmationOpen] = useState(false);
-
-  // Unity Integration
+  const [careSuggestions, setCareSuggestions] = useState<SuggestCareOutput | null>(null);
+  
+  // Camera states
+  const [isCameraEnabled, setIsCameraEnabled] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = useState(false);
+  
+  // Hooks
+  const { bonsaiProfiles, careReminders, addCareReminder, updateCareReminder } = useBonsaiData();
+  const { weather } = useWeather('Paris'); // Default to Paris
+  
+  // Unity integration
   const {
     unityProvider,
-    isLoaded,
-    loadingErrorCode, sendMessage,
+    isLoaded: unityLoaded,
+    loadingErrorCode,
+    sendMessage,
     addEventListener,
     removeEventListener,
   } = UnityWebGL.useUnityContext(unityConfig);
 
-  // Callback pour gérer les messages venant d'Unity
-  const handleUnityEvent = React.useCallback((...parameters: UnityWebGL.ReactUnityEventParameter[]) => {
-    // The first parameter is usually the event name, followed by data
-    const eventName = parameters[0] as string;
-    const data = parameters.slice(1);
-    console.log('Événement Unity reçu:', eventName, ...data);
-    // Traiter les événements spécifiques venant d'Unity si nécessaire
-  }, []);
+  // Unity event handlers
+  const handleUnityEvent = (eventName: string, ...data: any[]) => {
+    console.log('Unity event:', eventName, data);
+  };
 
-  React.useEffect(() => {
+  useEffect(() => {
     addEventListener('BonsaiLoaded', handleUnityEvent);
-    addEventListener('PruningApplied', handleUnityEvent); // Assuming PruningApplied also sends data
+    addEventListener('PruningApplied', handleUnityEvent);
     return () => {
       removeEventListener('BonsaiLoaded', handleUnityEvent);
       removeEventListener('PruningApplied', handleUnityEvent);
     };
-  }, [addEventListener, removeEventListener, handleUnityEvent]);
+  }, [addEventListener, removeEventListener]);
 
-  // Fonction pour envoyer les données du bonsaï à Unity
-  const sendBonsaiDataToUnity = (data: any) => {
-    if (isLoaded) {
-      sendMessage('BonsaiManager', 'LoadBonsaiData', JSON.stringify(data));
-    } else {
-      console.warn("Unity n'est pas encore chargé.");
-    }
-  };
-
-  // Fonction pour envoyer les suggestions de taille à Unity
-  const sendPruningSuggestionsToUnity = (suggestions: SuggestPruningOutput) => {
-    if (isLoaded) {
-      sendMessage(
-        'BonsaiManager',
-        'HighlightPruningAreas',
-        JSON.stringify(suggestions.branchIdentifications)
-      );
-      // Si vous voulez envoyer les suggestions textuelles aussi:
-      // sendMessage("BonsaiManager", "DisplayPruningSuggestions", suggestions.pruningSuggestions);
-    } else {
-      console.warn("Unity n'est pas encore chargé.");
-    }
-  };
-
+  // Camera functions
   const enableCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({video: true});
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       setHasCameraPermission(true);
       setIsCameraEnabled(true);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      // Mémoriser le choix si la case est cochée
-      if (rememberCameraChoice) {
-        localStorage.setItem('cameraPermissionGranted', 'true');
-      }
-    } catch (err: unknown) {
-      console.error("Erreur lors de l'accès à la caméra :", err);
-      setHasCameraPermission(false);
-      setIsCameraEnabled(false);
-      if (
-        err instanceof Error &&
-        (err.name === 'PermissionDeniedError' ||
-          err.name === 'NotAllowedError')
-      ) {
-        toast({
-          variant: 'destructive',
-          title: 'Accès à la caméra refusé',
-          description:
-            'Veuillez activer les autorisations de la caméra dans les paramètres de votre navigateur pour utiliser cette application.',
-        });
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erreur de caméra',
-          description:
-            "Une erreur s'est produite lors de l'accès à la caméra.",
-        });
-      }
-    } finally {
-      setIsCameraConfirmationOpen(false); // Ferme la pop-up après la tentative
+      toast({
+        title: 'Caméra activée',
+        description: 'Vous pouvez maintenant prendre des photos de vos bonsaïs.',
+      });
+    } catch (err) {
+      console.error('Camera error:', err);
+      setError('Impossible d\'accéder à la caméra. Vérifiez les autorisations.');
+      toast({
+        variant: 'destructive',
+        title: 'Erreur caméra',
+        description: 'Impossible d\'accéder à la caméra.',
+      });
     }
   };
 
-  const disableCamera = () => {
-    setIsCameraEnabled(false);
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
-    }
-    // Oublier le choix si la case est cochée et qu'on désactive
-    if (rememberCameraChoice) {
-      localStorage.removeItem('cameraPermissionGranted');
-    }
-  };
-
-  React.useEffect(() => {
-    // Vérifier si l'autorisation a été mémorisée
-    const permissionGranted = localStorage.getItem('cameraPermissionGranted');
-    if (permissionGranted === 'true') {
-      setRememberCameraChoice(true); // Coche la case si mémorisé
-      enableCamera(); // Active directement la caméra
+  // AI functions
+  const handleIdentifySpecies = async () => {
+    if (!photoUrl && !speciesDescription) {
+      setError('Veuillez fournir une photo ou une description.');
+      return;
     }
 
-    const currentVideo = videoRef.current;
-
-    return () => {
-      if (currentVideo && currentVideo.srcObject) {
-        const stream = currentVideo.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, []); // Exécuter une seule fois au montage
-
-  const captureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/png');
-        setPhotoUrl(dataUrl); // Stocke l'URL data de l'image capturée
-        handleIdentifySpecies(dataUrl); // Identifie directement avec l'image capturée
-      }
-    }
-  };
-
-  const handleIdentifySpecies = async (imageDataUrl?: string) => {
     setIsLoading(true);
     setError(null);
-    const urlToUse = imageDataUrl || photoUrl; // Utilise l'image capturée si fournie, sinon celle de l'input URL
 
     try {
-      if (!urlToUse) {
-        setError(
-          imageDataUrl
-            ? "Impossible de capturer l'image."
-            : "Veuillez fournir l'URL d'une photo ou prendre une photo."
-        );
-        setIsLoading(false);
-        return;
-      }
-      // Vérifie si l'URL commence par 'data:' (indiquant une data URI)
-      if (!urlToUse.startsWith('data:')) {
-         setError("Le format de l'URL de l'image n'est pas valide. Utilisez une image capturée ou une URL data.");
-         setIsLoading(false);
-         return;
-      }
-
       const result = await identifySpecies({
-        // The AI model expects photoUrl, not photoDataUri
-        photoUrl: urlToUse,
+        photoUrl: photoUrl || '',
         description: speciesDescription,
       });
-      setIdentificationResult(result); // Met à jour l'état avec le résultat
-      // Envoyer les données à Unity après identification
-      sendBonsaiDataToUnity(result);
-    } catch (err: any) {
-      console.error("Erreur lors de l'identification de l'espèce:", err);
-      setError(
-        `Échec de l'identification de l'espèce: ${err.message || 'Veuillez vérifier les entrées et réessayer.'}`
-      ); // Met à jour l'état d'erreur
+      setIdentificationResult(result);
+      toast({
+        title: 'Espèce identifiée',
+        description: `${result.species} avec ${Math.round(result.confidence * 100)}% de confiance.`,
+      });
+    } catch (err) {
+      console.error('Identification error:', err);
+      setError('Erreur lors de l\'identification. Veuillez réessayer.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false); // Désactive l'indicateur de chargement
   };
 
   const handleSuggestPruning = async () => {
+    if (!identificationResult?.species) {
+      setError('Veuillez d\'abord identifier l\'espèce.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+
     try {
-      if (!identificationResult?.species) {
-        setError(
-          "Veuillez identifier l'espèce avant de demander des suggestions de taille."
-        );
-        setIsLoading(false);
-        return;
-      }
       const result = await suggestPruning({
         species: identificationResult.species,
         userGoals: pruningGoals,
+        treeStructure,
         bonsaiDescription: speciesDescription,
-        treeStructure: treeStructure,
       });
       setPruningSuggestions(result);
-      // Envoyer les suggestions à Unity
-      sendPruningSuggestionsToUnity(result);
+      
+      // Send to Unity if loaded
+      if (unityLoaded) {
+        sendMessage('BonsaiManager', 'HighlightPruningAreas', JSON.stringify(result.branchIdentifications));
+      }
+      
+      toast({
+        title: 'Suggestions de taille générées',
+        description: 'Consultez le guide de taille pour les instructions détaillées.',
+      });
     } catch (err) {
-      console.error('Erreur lors de la suggestion de taille :', err);
-      setError(
-        'Échec de la suggestion de taille. Veuillez vérifier les entrées et réessayer.'
-      );
+      console.error('Pruning suggestion error:', err);
+      setError('Erreur lors de la génération des suggestions de taille.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleSuggestCare = async () => {
+    if (!identificationResult?.species) {
+      setError('Veuillez d\'abord identifier l\'espèce.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+
     try {
-      if (!identificationResult?.species) {
-        setError(
-          "Veuillez identifier l'espèce avant de demander des suggestions de soins."
-        );
-        setIsLoading(false);
-        return;
-      }
       const result = await suggestCare({
         species: identificationResult.species,
-        currentSeason: currentSeason,
-        treeHealth: treeHealth,
+        currentSeason,
+        treeHealth,
       });
       setCareSuggestions(result);
-    } catch (err: unknown) {
-      console.error('Erreur lors de la suggestion de soins :', err);
-      setError(
-        'Échec de la suggestion de soins. Veuillez vérifier les entrées et réessayer.'
-      );
+      toast({
+        title: 'Suggestions de soins générées',
+        description: 'Consultez les recommandations personnalisées.',
+      });
+    } catch (err) {
+      console.error('Care suggestion error:', err);
+      setError('Erreur lors de la génération des suggestions de soins.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
+  };
+
+  // Page rendering functions
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
+        <p className="text-muted-foreground">
+          Vue d'ensemble de votre collection de bonsaïs
+        </p>
+      </div>
+
+      <DashboardStats 
+        bonsaiProfiles={bonsaiProfiles} 
+        careReminders={careReminders} 
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {weather && (
+          <WeatherWidget weather={weather} location="Paris" />
+        )}
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icons.bell className="h-5 w-5" />
+              Prochains soins
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {careReminders.slice(0, 3).map((reminder) => (
+              <div key={reminder.id} className="flex items-center gap-3 py-2">
+                <Icons.droplets className="h-4 w-4 text-blue-500" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{reminder.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(reminder.dueDate).toLocaleDateString()}
+                  </p>
+                </div>
+                <Badge variant="outline" size="sm">
+                  {reminder.priority}
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+
+  const renderIdentification = () => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Identification d'espèces</h1>
+        <p className="text-muted-foreground">
+          Utilisez l'IA pour identifier votre bonsaï
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Identifier votre bonsaï</CardTitle>
+          <CardDescription>
+            Prenez une photo ou décrivez votre bonsaï pour l'identifier
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="camera" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="camera">Caméra</TabsTrigger>
+              <TabsTrigger value="description">Description</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="camera" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Utilisez votre caméra pour prendre une photo
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={enableCamera}
+                  disabled={isCameraEnabled}
+                >
+                  <Icons.camera className="h-4 w-4 mr-2" />
+                  {isCameraEnabled ? 'Caméra active' : 'Activer caméra'}
+                </Button>
+              </div>
+
+              {isCameraEnabled && (
+                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                  <p className="text-muted-foreground">Aperçu caméra</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="description" className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">URL de l'image</label>
+                  <Input
+                    type="url"
+                    placeholder="https://exemple.com/image.jpg"
+                    value={photoUrl || ''}
+                    onChange={(e) => setPhotoUrl(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Description du bonsaï</label>
+                  <Textarea
+                    placeholder="Décrivez les caractéristiques de votre bonsaï..."
+                    value={speciesDescription}
+                    onChange={(e) => setSpeciesDescription(e.target.value)}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {error && (
+            <Alert variant="destructive">
+              <Icons.alert className="h-4 w-4" />
+              <AlertTitle>Erreur</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <Button
+            onClick={handleIdentifySpecies}
+            disabled={isLoading}
+            className="w-full"
+          >
+            {isLoading ? (
+              <Icons.spinner className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Icons.search className="h-4 w-4 mr-2" />
+            )}
+            Identifier l'espèce
+          </Button>
+        </CardContent>
+      </Card>
+
+      {identificationResult && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Résultat de l'identification</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-lg">{identificationResult.species}</h3>
+                <p className="text-sm text-muted-foreground">
+                  Confiance: {Math.round(identificationResult.confidence * 100)}%
+                </p>
+              </div>
+              <p className="text-sm">{identificationResult.characteristics}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {mockSpecies.map((species) => (
+          <SpeciesCard
+            key={species.id}
+            species={species}
+            onClick={() => {
+              setIdentificationResult({
+                species: species.commonName,
+                confidence: 0.95,
+                characteristics: species.characteristics.join(', '),
+              });
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderPruning = () => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Guide de taille</h1>
+        <p className="text-muted-foreground">
+          Obtenez des conseils personnalisés pour tailler vos bonsaïs
+        </p>
+      </div>
+
+      {!identificationResult && (
+        <Alert>
+          <Icons.info className="h-4 w-4" />
+          <AlertTitle>Information</AlertTitle>
+          <AlertDescription>
+            Veuillez d'abord identifier votre bonsaï dans la section "Identifier".
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {identificationResult && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Paramètres de taille</CardTitle>
+            <CardDescription>
+              Décrivez vos objectifs pour obtenir des suggestions personnalisées
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Structure actuelle de l'arbre</label>
+              <Textarea
+                placeholder="Décrivez la structure et le placement des branches..."
+                value={treeStructure}
+                onChange={(e) => setTreeStructure(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Objectifs de taille</label>
+              <Textarea
+                placeholder="Quels sont vos objectifs ? (forme, santé, style...)"
+                value={pruningGoals}
+                onChange={(e) => setPruningGoals(e.target.value)}
+              />
+            </div>
+            <Button
+              onClick={handleSuggestPruning}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? (
+                <Icons.spinner className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Icons.scissors className="h-4 w-4 mr-2" />
+              )}
+              Générer les suggestions
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {pruningSuggestions && (
+        <PruningGuide
+          suggestions={pruningSuggestions}
+          onApplyPruning={(branchId) => {
+            console.log('Applying pruning to branch:', branchId);
+            toast({
+              title: 'Taille appliquée',
+              description: 'La branche a été marquée comme taillée.',
+            });
+          }}
+          onSaveSession={() => {
+            toast({
+              title: 'Session sauvegardée',
+              description: 'Votre session de taille a été enregistrée.',
+            });
+          }}
+        />
+      )}
+    </div>
+  );
+
+  const renderCare = () => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Soins et calendrier</h1>
+        <p className="text-muted-foreground">
+          Planifiez et suivez les soins de vos bonsaïs
+        </p>
+      </div>
+
+      <CareCalendar
+        reminders={careReminders}
+        onReminderClick={(reminder) => {
+          console.log('Reminder clicked:', reminder);
+        }}
+        onDateSelect={(date) => {
+          console.log('Date selected:', date);
+        }}
+      />
+
+      {identificationResult && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Suggestions de soins personnalisées</CardTitle>
+            <CardDescription>
+              Obtenez des conseils adaptés à votre bonsaï et à la saison
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Saison actuelle</label>
+                <Input
+                  placeholder="ex: Printemps"
+                  value={currentSeason}
+                  onChange={(e) => setCurrentSeason(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">État de santé</label>
+                <Textarea
+                  placeholder="Décrivez l'état actuel de votre bonsaï..."
+                  value={treeHealth}
+                  onChange={(e) => setTreeHealth(e.target.value)}
+                />
+              </div>
+            </div>
+            <Button
+              onClick={handleSuggestCare}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? (
+                <Icons.spinner className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Icons.droplets className="h-4 w-4 mr-2" />
+              )}
+              Générer les suggestions de soins
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {careSuggestions && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recommandations de soins</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm">{careSuggestions.careSuggestions}</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
+  const renderVisualization = () => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Visualisation 3D</h1>
+        <p className="text-muted-foreground">
+          Interagissez avec le modèle 3D de votre bonsaï
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Modèle 3D interactif</CardTitle>
+          <CardDescription>
+            Visualisez votre bonsaï en 3D et les zones de taille suggérées
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="aspect-video border rounded-lg overflow-hidden bg-muted">
+            {unityLoaded ? (
+              <UnityWebGL.Unity
+                unityProvider={unityProvider as any}
+                style={{ width: '100%', height: '100%' }}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <Icons.spinner className="h-8 w-8 animate-spin mx-auto mb-4" />
+                  <p className="text-muted-foreground">Chargement du modèle 3D...</p>
+                  {loadingErrorCode && (
+                    <p className="text-red-500 text-sm mt-2">
+                      Erreur de chargement: {loadingErrorCode}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {pruningSuggestions && unityLoaded && (
+            <div className="mt-4">
+              <Button
+                onClick={() => {
+                  sendMessage(
+                    'BonsaiManager',
+                    'HighlightPruningAreas',
+                    JSON.stringify(pruningSuggestions.branchIdentifications)
+                  );
+                }}
+              >
+                <Icons.eye className="h-4 w-4 mr-2" />
+                Afficher les zones de taille
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'dashboard':
+        return renderDashboard();
+      case 'identify':
+        return renderIdentification();
+      case 'pruning':
+        return renderPruning();
+      case 'care':
+        return renderCare();
+      case 'visualization':
+        return renderVisualization();
+      default:
+        return renderDashboard();
+    }
   };
 
   return (
-    <main className="flex h-screen antialiased text-foreground bg-background">
-      <SidebarProvider>
-        <Sidebar collapsible="icon">
-          <SidebarContent>
-            <SidebarMenu>
-              <SidebarMenuButton className="flex items-center mt-2">
-                <Home className="mr-2 h-4 w-4" />
-                Toggle Sidebar
-              </SidebarMenuButton>
-            </SidebarMenu>
-            <div className="p-2">
-              <div className="font-medium text-sm">BonsAI Assist</div>
-            </div>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="flex items-center">
-                  <Icons.search className="mr-2 h-4 w-4" />
-                  Identifier l'espèce
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="flex items-center">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Guide de taille
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="flex items-center">
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Visualisation et Taille
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-            <div className="p-2">
-              <div className="font-medium text-sm">Compte</div>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton className="flex items-center">
-                    <User className="mr-2 h-4 w-4" />
-                    Profil
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton className="flex items-center">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Paramètres
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton className="flex items-center">
-                    <Shield className="mr-2 h-4 w-4" />
-                    Confidentialité
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton className="flex items-center">
-                    <Trash className="mr-2 h-4 w-4" />
-                    Corbeille
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-              <div className="p-2 mt-auto">
-                <p className="text-xs text-muted-foreground">
-                  Créez de magnifiques Bonsaïs quelle que soit votre expérience
-                </p>
-              </div>
-            </div>
-          </SidebarContent>
-        </Sidebar>
-        <SidebarInset className="flex flex-col border-l overflow-y-auto">
-          <div className="container mx-auto p-4 flex-grow">
-            <Card>
-              <CardHeader>
-                <CardTitle>Identifier votre Bonsaï</CardTitle>
-                <CardDescription>
-                  Utilisez votre caméra ou fournissez une URL pour identifier
-                  votre bonsaï.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="camera" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="camera">Caméra</TabsTrigger>
-                    <TabsTrigger value="url">URL/Description</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="camera">
-                    <div className="flex items-center justify-between mb-2">
-                       <CardDescription>
-                          Visualisez votre bonsaï avec votre caméra
-                       </CardDescription>
-                       <AlertDialog
-                         open={isCameraConfirmationOpen}
-                         onOpenChange={setIsCameraConfirmationOpen}
-                       >
-                         <AlertDialogTrigger asChild>
-                           <Button
-                             variant="outline"
-                             disabled={isLoading || isCameraEnabled} // Désactive si déjà activé
-                             onClick={() => setIsCameraConfirmationOpen(true)} // Ouvre la pop-up
-                           >
-                             <Camera className="mr-2 h-4 w-4" />
-                             Activer la caméra
-                           </Button>
-                         </AlertDialogTrigger>
-                         <AlertDialogContent>
-                           <AlertDialogHeader>
-                             <AlertDialogTitle>
-                               Activer la caméra ?
-                             </AlertDialogTitle>
-                             <AlertDialogDescription>
-                               L'activation de la caméra permettra à
-                               l'application d'accéder à la caméra de votre
-                               appareil. Assurez-vous d'avoir accordé les
-                               autorisations nécessaires.
-                               <div className="flex items-center space-x-2 mt-4">
-                                 <Switch
-                                   id="remember-camera"
-                                   checked={rememberCameraChoice}
-                                   onCheckedChange={setRememberCameraChoice}
-                                 />
-                                 <Label htmlFor="remember-camera">
-                                   Se souvenir de mon choix
-                                 </Label>
-                               </div>
-                             </AlertDialogDescription>
-                           </AlertDialogHeader>
-                           <AlertDialogFooter>
-                             <AlertDialogCancel onClick={() => setIsCameraConfirmationOpen(false)}> {/* Ferme la pop-up */}
-                               Annuler
-                             </AlertDialogCancel>
-                             <AlertDialogAction onClick={enableCamera}>
-                               Continuer
-                             </AlertDialogAction>
-                           </AlertDialogFooter>
-                         </AlertDialogContent>
-                       </AlertDialog>
-                     </div>
-
-                     {hasCameraPermission === false && ( // Affiche seulement si la permission n'est PAS accordée
-                       <Alert variant="destructive" className="mb-4">
-                         <AlertTitle>Accès à la caméra requis</AlertTitle>
-                         <AlertDescription>
-                           Veuillez autoriser l'accès à la caméra pour utiliser
-                           cette fonctionnalité.
-                         </AlertDescription>
-                       </Alert>
-                     )}
-
-
-                    <video
-                      ref={videoRef}
-                      className={`w-full aspect-video rounded-md ${
-                        isCameraEnabled ? '' : 'bg-muted'
-                      }`} // Fond gris si caméra désactivée
-                      autoPlay
-                      muted
-                    />
-                    <canvas ref={canvasRef} style={{display: 'none'}} />
-
-                    {error && (
-                      <Alert variant="destructive" className="mt-4">
-                        <AlertTitle>Erreur</AlertTitle>
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
-                    <div className="flex gap-2 mt-4">
-                      <Button
-                        onClick={captureImage}
-                        disabled={isLoading || !isCameraEnabled}
-                        className="flex-1"
-                      >
-                        {isLoading ? (
-                          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Icons.camera className="mr-2 h-4 w-4" />
-                        )}
-                        Identifier par caméra
-                      </Button>
-                      {isCameraEnabled && (
-                        <Button
-                          variant="outline"
-                          onClick={disableCamera}
-                          disabled={isLoading}
-                        >
-                          Désactiver
-                        </Button>
-                      )}
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="url">
-                    {error && (
-                      <Alert variant="destructive">
-                        <AlertTitle>Erreur</AlertTitle>
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
-                    <div className="grid gap-4">
-                      <div>
-                        <Input
-                          type="url"
-                          placeholder="URL de la photo (doit être une data URL)"
-                          value={photoUrl || ''}
-                          onChange={(e) => setPhotoUrl(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Textarea
-                          placeholder="Description du bonsaï"
-                          value={speciesDescription}
-                          onChange={(e) => setSpeciesDescription(e.target.value)}
-                        />
-                      </div>
-                      <Button
-                        onClick={() => handleIdentifySpecies()}
-                        disabled={isLoading}
-                      >
-                        {isLoading ? (
-                          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Icons.search className="mr-2 h-4 w-4" />
-                        )}
-                        Identifier par URL/Description
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-
-            {identificationResult && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle>Résultat de l'identification</CardTitle>
-                  <CardDescription>
-                    Voici les détails de l'espèce identifiée.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="species">
-                      <AccordionTrigger>Espèce</AccordionTrigger>
-                      <AccordionContent>
-                        {identificationResult.species}
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="confidence">
-                      <AccordionTrigger>Confiance</AccordionTrigger>
-                      <AccordionContent>
-                        {(identificationResult.confidence * 100).toFixed(0)}%
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="characteristics">
-                      <AccordionTrigger>Caractéristiques</AccordionTrigger>
-                      <AccordionContent>
-                        {identificationResult.characteristics}
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </CardContent>
-              </Card>
-            )}
-
-            {identificationResult && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle>Suggestions de taille</CardTitle>
-                  <CardDescription>
-                    Obtenez des suggestions de taille personnalisées pour
-                    votre bonsaï.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4">
-                    <div>
-                      <Textarea
-                        placeholder="Description de la structure de l'arbre et du placement des branches"
-                        value={treeStructure}
-                        onChange={(e) => setTreeStructure(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Textarea
-                        placeholder="Quels sont vos objectifs pour le bonsaï (par exemple, mise en forme, santé) ?"
-                        value={pruningGoals}
-                        onChange={(e) => setPruningGoals(e.target.value)}
-                      />
-                    </div>
-                    <Button onClick={handleSuggestPruning} disabled={isLoading}>
-                      {isLoading ? (
-                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Icons.plus className="mr-2 h-4 w-4" />
-                      )}
-                      Suggérer une taille
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {pruningSuggestions && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle>Suggestions de taille</CardTitle>
-                  <CardDescription>
-                    Voici les suggestions de taille en fonction de vos
-                    objectifs.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="suggestions">
-                      <AccordionTrigger>Suggestions</AccordionTrigger>
-                      <AccordionContent>
-                        {pruningSuggestions.pruningSuggestions}
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="branches">
-                      <AccordionTrigger>Branches à tailler</AccordionTrigger>
-                      <AccordionContent>
-                        {pruningSuggestions.branchIdentifications}
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </CardContent>
-              </Card>
-            )}
-
-            {identificationResult && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle>Suggestions de soins</CardTitle>
-                  <CardDescription>
-                    Obtenez des suggestions de soins personnalisées pour votre
-                    bonsaï.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4">
-                    <div>
-                      <Input
-                        type="text"
-                        placeholder="Saison actuelle (ex: Printemps)"
-                        value={currentSeason}
-                        onChange={(e) => setCurrentSeason(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Textarea
-                        placeholder="État de santé de l'arbre (ex: feuilles jaunes, croissance lente)"
-                        value={treeHealth}
-                        onChange={(e) => setTreeHealth(e.target.value)}
-                      />
-                    </div>
-                    <Button onClick={handleSuggestCare} disabled={isLoading}>
-                      {isLoading ? (
-                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Icons.plus className="mr-2 h-4 w-4" />
-                      )}
-                      Suggérer des soins
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {careSuggestions && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle>Suggestions de soins</CardTitle>
-                  <CardDescription>
-                    Voici les suggestions de soins en fonction de la saison et
-                    de l'état de santé de votre bonsaï.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p>{careSuggestions.careSuggestions}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Section pour Unity */}
-            {isLoaded && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle>Visualisation 3D</CardTitle>
-                  <CardDescription>
-                    Interagissez avec le modèle 3D de votre bonsaï.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="aspect-video border rounded-md overflow-hidden">
-                    <UnityWebGL.Unity
-                      unityProvider={unityProvider as any}
-                      style={{width: '100%', height: '100%'}}
-                    />
-                  </div>
-                  {/* Ajouter des boutons ou contrôles pour interagir avec Unity si nécessaire */}
-                  {pruningSuggestions && (
-                     <Button onClick={() => sendPruningSuggestionsToUnity(pruningSuggestions)} className="mt-2">
-                       Afficher les coupes suggérées en 3D
-                     </Button>
-                   )}
-                </CardContent>
-              </Card>
-            )}
-            {!isLoaded && (
-               <Card className="mt-4">
-                 <CardHeader>
-                   <CardTitle>Visualisation 3D</CardTitle>
-                 </CardHeader>
-                 {loadingErrorCode && (
-                  <Alert variant="destructive">Error loading Unity: {loadingErrorCode}</Alert>
-                 )}
-                 <CardContent>
-                   <p>Chargement de la visualisation 3D...</p>
-                 </CardContent>
-               </Card>
-             )}
-
+    <SidebarProvider>
+      <div className="flex h-screen w-full">
+        <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+        <SidebarInset className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6">
+            {renderCurrentPage()}
           </div>
         </SidebarInset>
-      </SidebarProvider>
-    </main>
+      </div>
+      <Toaster />
+    </SidebarProvider>
   );
 }

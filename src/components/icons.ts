@@ -1,76 +1,221 @@
-/**
- * @fileOverview Collection d'icônes utilisées dans l'application.
- * Ce fichier importe et réexporte une sélection d'icônes de la bibliothèque `lucide-react`
- * sous un alias `Icons` pour une utilisation simplifiée.
- */
-
-// Importation des icônes spécifiques de lucide-react
 import {
-  ArrowRight,
-  Check,
-  ChevronsUpDown, // Peut être utilisé pour les menus déroulants
-  Circle,
-  Copy,
-  Edit,
-  ExternalLink,
-  File,
-  HelpCircle,
-  Home,
-  Loader2, // Utilisé comme indicateur de chargement/spinner
-  Mail,
-  MessageSquare, // Pourrait être utilisé pour un chatbot
-  Moon, // Icône pour le thème sombre
-  Plus,
-  PlusCircle,
+  Camera,
   Search,
-  Server, // Pourrait représenter le backend ou l'IA
+  Plus,
+  Spinner,
+  AlertCircle,
+  CheckCircle,
+  Info,
+  X,
+  Menu,
   Settings,
-  Share2,
-  Shield, // Pourrait représenter la sécurité ou la validation
-  Sun, // Icône pour le thème clair
-  Trash, // Pour la suppression
   User,
-  X, // Icône de fermeture
-  Workflow, // Pourrait représenter les flux AI
-  Camera
-} from 'lucide-react';
+  Home,
+  Calendar,
+  Bell,
+  Droplets,
+  Scissors,
+  Eye,
+  TreePine,
+  Leaf,
+  Sun,
+  Cloud,
+  CloudRain,
+  Thermometer,
+  Wind,
+  Activity,
+  BarChart3,
+  Clock,
+  MapPin,
+  Smartphone,
+  Monitor,
+  Tablet,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Upload,
+  Share,
+  Heart,
+  Star,
+  Bookmark,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Grid,
+  List,
+  Maximize,
+  Minimize,
+  RotateCcw,
+  RotateCw,
+  ZoomIn,
+  ZoomOut,
+  Move,
+  Copy,
+  Trash2,
+  Edit,
+  Save,
+  FileText,
+  Image,
+  Video,
+  Mic,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  Stop,
+  SkipBack,
+  SkipForward,
+  Repeat,
+  Shuffle,
+  Wifi,
+  WifiOff,
+  Battery,
+  BatteryLow,
+  Signal,
+  SignalHigh,
+  SignalLow,
+  SignalMedium,
+  SignalZero,
+  Bluetooth,
+  BluetoothConnected,
+  Usb,
+  HardDrive,
+  Cpu,
+  MemoryStick,
+  Monitor as MonitorIcon,
+  Printer,
+  Scanner,
+  Keyboard,
+  Mouse,
+  Headphones,
+  Gamepad2,
+  Joystick,
+  type LucideIcon,
+} from "lucide-react"
 
-/**
- * Objet contenant les icônes importées pour une utilisation facile dans l'application.
- * Chaque clé correspond à un nom d'usage courant et la valeur est le composant Icône de Lucide.
- * @type {Record<string, React.ElementType>}
- */
-const Icons = {
-  arrowRight: ArrowRight,
-  check: Check,
-  chevronUpDown: ChevronsUpDown, // Renommé pour la clarté
-  circle: Circle,
-  workflow: Workflow,
-  close: X,
-  copy: Copy,
-  dark: Moon,
-  edit: Edit,
-  externalLink: ExternalLink,
-  file: File,
-  help: HelpCircle,
+export type Icon = LucideIcon
+
+export const Icons = {
+  // Navigation
+  menu: Menu,
   home: Home,
-  light: Sun,
-  loader: Loader2,
-  mail: Mail,
-  messageSquare: MessageSquare,
-  plus: Plus,
-  plusCircle: PlusCircle,
-  search: Search,
-  server: Server,
   settings: Settings,
-  share: Share2,
-  shield: Shield,
-  spinner: Loader2, // Alias commun pour loader
-  trash: Trash,
   user: User,
-  camera:Camera
-};
+  
+  // Actions
+  camera: Camera,
+  search: Search,
+  plus: Plus,
+  edit: Edit,
+  save: Save,
+  copy: Copy,
+  trash: Trash2,
+  download: Download,
+  upload: Upload,
+  share: Share,
+  
+  // Status
+  spinner: Spinner,
+  loading: Spinner,
+  alert: AlertCircle,
+  success: CheckCircle,
+  info: Info,
+  close: X,
+  
+  // Bonsai specific
+  tree: TreePine,
+  leaf: Leaf,
+  scissors: Scissors,
+  droplets: Droplets,
+  eye: Eye,
+  
+  // Weather
+  sun: Sun,
+  cloud: Cloud,
+  rain: CloudRain,
+  thermometer: Thermometer,
+  wind: Wind,
+  
+  // UI
+  chevronDown: ChevronDown,
+  chevronUp: ChevronUp,
+  chevronLeft: ChevronLeft,
+  chevronRight: ChevronRight,
+  
+  // Time & Calendar
+  calendar: Calendar,
+  clock: Clock,
+  bell: Bell,
+  
+  // Data & Analytics
+  activity: Activity,
+  barChart: BarChart3,
+  
+  // Location
+  mapPin: MapPin,
+  
+  // Devices
+  smartphone: Smartphone,
+  monitor: Monitor,
+  tablet: Tablet,
+  
+  // Media
+  image: Image,
+  video: Video,
+  mic: Mic,
+  volume: Volume2,
+  volumeOff: VolumeX,
+  play: Play,
+  pause: Pause,
+  stop: Stop,
+  
+  // Interaction
+  heart: Heart,
+  star: Star,
+  bookmark: Bookmark,
+  
+  // Layout
+  grid: Grid,
+  list: List,
+  filter: Filter,
+  sortAsc: SortAsc,
+  sortDesc: SortDesc,
+  
+  // Transform
+  maximize: Maximize,
+  minimize: Minimize,
+  rotate: RotateCcw,
+  rotateRight: RotateCw,
+  zoomIn: ZoomIn,
+  zoomOut: ZoomOut,
+  move: Move,
+  
+  // Files
+  file: FileText,
+  
+  // Connectivity
+  wifi: Wifi,
+  wifiOff: WifiOff,
+  bluetooth: Bluetooth,
+  bluetoothConnected: BluetoothConnected,
+  
+  // Hardware
+  battery: Battery,
+  batteryLow: BatteryLow,
+  cpu: Cpu,
+  hardDrive: HardDrive,
+  memory: MemoryStick,
+  
+  // Peripherals
+  printer: Printer,
+  scanner: Scanner,
+  keyboard: Keyboard,
+  mouse: Mouse,
+  headphones: Headphones,
+  gamepad: Gamepad2,
+  joystick: Joystick,
+} as const
 
-// Exportation de l'objet Icons pour utilisation dans d'autres composants
-export { Icons };
-
+export type IconName = keyof typeof Icons
