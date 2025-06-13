@@ -17,6 +17,15 @@ export interface Weather {
   conditions: string;
 }
 
+interface WeatherApiResponse {
+  main: {
+    temp: number;
+  };
+  weather: Array<{
+    description: string;
+  }>;
+}
+
 /**
  * Asynchronously retrieves weather information for a given location, and adapt it depending on the bonsai.
  *
@@ -45,7 +54,7 @@ export async function getWeather(city: string, bonsaiSpecies: string): Promise<W
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: WeatherApiResponse = await response.json();
     return parseWeatherData(data, bonsaiData);
   } catch (error) {
     console.error('Error fetching weather data:', error);
@@ -53,7 +62,7 @@ export async function getWeather(city: string, bonsaiSpecies: string): Promise<W
   }
 }
 
-function parseWeatherData(data: unknown, bonsaiData: SpeciesData | undefined): Weather {
+function parseWeatherData(data: WeatherApiResponse, bonsaiData: SpeciesData | undefined): Weather {
   if (!data || !data.main || !data.weather || data.weather.length === 0) {
     throw new Error('Invalid weather data format');
   }

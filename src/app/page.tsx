@@ -6,7 +6,6 @@ import { DashboardStats } from '@/components/bonsai/dashboard-stats';
 import { CareCalendar } from '@/components/bonsai/care-calendar';
 import { WeatherWidget } from '@/components/bonsai/weather-widget';
 import { PruningGuide } from '@/components/bonsai/pruning-guide';
-import { SpeciesCard } from '@/components/bonsai/species-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,7 +13,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { Icons } from '@/components/icons';
@@ -22,48 +20,26 @@ import { useBonsaiData } from '@/hooks/use-bonsai-data';
 import { useWeather } from '@/hooks/use-weather';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { identifySpecies } from '@/ai/flows/identify-species';
-import { suggestPruning } from '@/ai/flows/suggest-pruning';
-import { suggestCare } from '@/ai/flows/suggest-care';
-import { BonsaiProfile, CareReminder, BonsaiSpecies } from '@/types';
+import { identifySpecies, type IdentifySpeciesOutput } from '@/ai/flows/identify-species';
+import { suggestPruning, type SuggestPruningOutput } from '@/ai/flows/suggest-pruning';
+import { suggestCare, type SuggestCareOutput } from '@/ai/flows/suggest-care';
+import Image from 'next/image';
 
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [identificationResult, setIdentificationResult] = useState<any>(null);
-  const [pruningSuggestions, setPruningSuggestions] = useState<any>(null);
-  const [careSuggestions, setCareSuggestions] = useState<any>(null);
+  const [identificationResult, setIdentificationResult] = useState<IdentifySpeciesOutput | null>(null);
+  const [pruningSuggestions, setPruningSuggestions] = useState<SuggestPruningOutput | null>(null);
+  const [careSuggestions, setCareSuggestions] = useState<SuggestCareOutput | null>(null);
   const [description, setDescription] = useState('');
   const [userGoals, setUserGoals] = useState('');
   const [currentSeason, setCurrentSeason] = useState('Spring');
   const [treeHealth, setTreeHealth] = useState('');
 
-  const { bonsaiProfiles, careReminders, addCareReminder, updateCareReminder } = useBonsaiData();
+  const { bonsaiProfiles, careReminders, updateCareReminder } = useBonsaiData();
   const { weather } = useWeather('Paris');
   const { toast } = useToast();
-
-  // Mock data for species
-  const mockSpecies: BonsaiSpecies[] = [
-    {
-      id: '1',
-      scientificName: 'Acer palmatum',
-      commonName: 'Érable japonais',
-      family: 'Aceraceae',
-      characteristics: ['Feuilles palmées', 'Couleurs automnales'],
-      careLevel: 'intermediate',
-      growthRate: 'medium',
-      lightRequirements: 'medium',
-      wateringFrequency: 'Tous les 2-3 jours',
-      optimalTemperature: { min: 15, max: 25 },
-      optimalHumidity: { min: 40, max: 60 },
-      soilType: 'Bien drainé',
-      fertilizer: 'Engrais équilibré',
-      pruningSeasons: ['Printemps', 'Automne'],
-      commonIssues: ['Pucerons', 'Brûlure des feuilles'],
-      tips: ['Protéger du soleil direct en été']
-    }
-  ];
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -79,7 +55,7 @@ export default function HomePage() {
   const handleCameraCapture = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      // Créer un élément video pour capturer l'image
+      // Créer un élément video pour capturer l&apos;image
       const video = document.createElement('video');
       video.srcObject = stream;
       video.play();
@@ -98,9 +74,10 @@ export default function HomePage() {
         stream.getTracks().forEach(track => track.stop());
       });
     } catch (error) {
+      console.error('Camera error:', error);
       toast({
         title: "Erreur",
-        description: "Impossible d'accéder à l'appareil photo",
+        description: "Impossible d&apos;accéder à l&apos;appareil photo",
         variant: "destructive"
       });
     }
@@ -128,9 +105,10 @@ export default function HomePage() {
         description: `Espèce identifiée: ${result.species}`,
       });
     } catch (error) {
+      console.error('Identification error:', error);
       toast({
         title: "Erreur",
-        description: "Erreur lors de l'identification",
+        description: "Erreur lors de l&apos;identification",
         variant: "destructive"
       });
     } finally {
@@ -142,7 +120,7 @@ export default function HomePage() {
     if (!identificationResult || !userGoals) {
       toast({
         title: "Information manquante",
-        description: "Veuillez d'abord identifier l'espèce et définir vos objectifs",
+        description: "Veuillez d&apos;abord identifier l&apos;espèce et définir vos objectifs",
         variant: "destructive"
       });
       return;
@@ -161,6 +139,7 @@ export default function HomePage() {
         description: "Conseils de taille disponibles",
       });
     } catch (error) {
+      console.error('Pruning suggestions error:', error);
       toast({
         title: "Erreur",
         description: "Erreur lors de la génération des suggestions",
@@ -175,7 +154,7 @@ export default function HomePage() {
     if (!identificationResult || !treeHealth) {
       toast({
         title: "Information manquante",
-        description: "Veuillez d'abord identifier l'espèce et décrire l'état de santé",
+        description: "Veuillez d&apos;abord identifier l&apos;espèce et décrire l&apos;état de santé",
         variant: "destructive"
       });
       return;
@@ -194,6 +173,7 @@ export default function HomePage() {
         description: "Conseils de soins disponibles",
       });
     } catch (error) {
+      console.error('Care suggestions error:', error);
       toast({
         title: "Erreur",
         description: "Erreur lors de la génération des conseils",
@@ -210,7 +190,7 @@ export default function HomePage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
           <p className="text-muted-foreground">
-            Vue d'ensemble de votre collection de bonsaïs
+            Vue d&apos;ensemble de votre collection de bonsaïs
           </p>
         </div>
         <Button onClick={() => setCurrentPage('identify')}>
@@ -244,7 +224,7 @@ export default function HomePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Identifier votre bonsaï</h1>
         <p className="text-muted-foreground">
-          Utilisez l'IA pour identifier l'espèce de votre bonsaï
+          Utilisez l&apos;IA pour identifier l&apos;espèce de votre bonsaï
         </p>
       </div>
 
@@ -257,19 +237,21 @@ export default function HomePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[200px] flex flex-col items-center justify-center">
               {selectedImage ? (
                 <div className="space-y-4">
-                  <img 
+                  <Image 
                     src={selectedImage} 
                     alt="Bonsaï sélectionné" 
+                    width={300}
+                    height={200}
                     className="max-w-full h-48 object-cover mx-auto rounded-lg"
                   />
                   <Button 
                     variant="outline" 
                     onClick={() => setSelectedImage(null)}
                   >
-                    Changer l'image
+                    Changer l&apos;image
                   </Button>
                 </div>
               ) : (
@@ -289,7 +271,7 @@ export default function HomePage() {
                 variant="outline"
               >
                 <Icons.camera className="h-4 w-4 mr-2" />
-                Utiliser l'appareil photo
+                Utiliser l&apos;appareil photo
               </Button>
               <Button 
                 onClick={() => document.getElementById('file-upload')?.click()}
@@ -315,12 +297,12 @@ export default function HomePage() {
           <CardHeader>
             <CardTitle>Description</CardTitle>
             <CardDescription>
-              Décrivez votre bonsaï pour améliorer l'identification
+              Décrivez votre bonsaï pour améliorer l&apos;identification
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea
-              placeholder="Décrivez les caractéristiques de votre bonsaï (forme des feuilles, couleur de l'écorce, taille, etc.)"
+              placeholder="Décrivez les caractéristiques de votre bonsaï (forme des feuilles, couleur de l&apos;écorce, taille, etc.)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
@@ -333,13 +315,13 @@ export default function HomePage() {
             >
               {isLoading ? (
                 <>
-                  <Icons.loading className="h-4 w-4 mr-2 animate-spin" />
+                  <Icons.spinner className="h-4 w-4 mr-2 animate-spin" />
                   Identification en cours...
                 </>
               ) : (
                 <>
                   <Icons.search className="h-4 w-4 mr-2" />
-                  Identifier l'espèce
+                  Identifier l&apos;espèce
                 </>
               )}
             </Button>
@@ -350,7 +332,7 @@ export default function HomePage() {
       {identificationResult && (
         <Card>
           <CardHeader>
-            <CardTitle>Résultat de l'identification</CardTitle>
+            <CardTitle>Résultat de l&apos;identification</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -496,7 +478,7 @@ export default function HomePage() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">État de santé</label>
                   <Textarea
-                    placeholder="Décrivez l'état actuel de votre bonsaï..."
+                    placeholder="Décrivez l&apos;état actuel de votre bonsaï..."
                     value={treeHealth}
                     onChange={(e) => setTreeHealth(e.target.value)}
                     rows={3}
@@ -511,7 +493,7 @@ export default function HomePage() {
               >
                 {isLoading ? (
                   <>
-                    <Icons.loading className="h-4 w-4 mr-2 animate-spin" />
+                    <Icons.spinner className="h-4 w-4 mr-2 animate-spin" />
                     Génération en cours...
                   </>
                 ) : (
@@ -543,7 +525,7 @@ export default function HomePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Guide de Taille</h1>
         <p className="text-muted-foreground">
-          Conseils de taille personnalisés avec l'IA
+          Conseils de taille personnalisés avec l&apos;IA
         </p>
       </div>
 
@@ -570,7 +552,7 @@ export default function HomePage() {
             >
               {isLoading ? (
                 <>
-                  <Icons.loading className="h-4 w-4 mr-2 animate-spin" />
+                  <Icons.spinner className="h-4 w-4 mr-2 animate-spin" />
                   Génération en cours...
                 </>
               ) : (
@@ -607,7 +589,7 @@ export default function HomePage() {
           <Icons.info className="h-4 w-4" />
           <AlertTitle>Identification requise</AlertTitle>
           <AlertDescription>
-            Veuillez d'abord identifier votre bonsaï pour obtenir des conseils de taille personnalisés.
+            Veuillez d&apos;abord identifier votre bonsaï pour obtenir des conseils de taille personnalisés.
             <Button 
               variant="link" 
               className="p-0 h-auto ml-2"
@@ -673,7 +655,7 @@ export default function HomePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Tutoriels</h1>
         <p className="text-muted-foreground">
-          Guides d'apprentissage pour maîtriser l'art du bonsaï
+          Guides d&apos;apprentissage pour maîtriser l&apos;art du bonsaï
         </p>
       </div>
 
@@ -687,7 +669,7 @@ export default function HomePage() {
           },
           {
             title: "Techniques de taille",
-            description: "Maîtrisez l'art de la taille",
+            description: "Maîtrisez l&apos;art de la taille",
             difficulty: "Intermédiaire",
             duration: "45 min"
           },
@@ -720,7 +702,7 @@ export default function HomePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Communauté</h1>
         <p className="text-muted-foreground">
-          Partagez et discutez avec d'autres passionnés de bonsaï
+          Partagez et discutez avec d&apos;autres passionnés de bonsaï
         </p>
       </div>
 
@@ -796,7 +778,7 @@ export default function HomePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Paramètres</h1>
         <p className="text-muted-foreground">
-          Configurez l'application selon vos préférences
+          Configurez l&apos;application selon vos préférences
         </p>
       </div>
 
@@ -807,7 +789,7 @@ export default function HomePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span>Rappels d'arrosage</span>
+              <span>Rappels d&apos;arrosage</span>
               <input type="checkbox" defaultChecked />
             </div>
             <div className="flex items-center justify-between">
@@ -858,7 +840,7 @@ export default function HomePage() {
       <Tabs defaultValue="faq" className="w-full">
         <TabsList>
           <TabsTrigger value="faq">FAQ</TabsTrigger>
-          <TabsTrigger value="guide">Guide d'utilisation</TabsTrigger>
+          <TabsTrigger value="guide">Guide d&apos;utilisation</TabsTrigger>
           <TabsTrigger value="contact">Contact</TabsTrigger>
         </TabsList>
         
@@ -867,15 +849,15 @@ export default function HomePage() {
             {[
               {
                 question: "Comment identifier mon bonsaï ?",
-                answer: "Utilisez la section 'Identifier' pour prendre une photo de votre bonsaï et ajouter une description. Notre IA analysera l'image pour identifier l'espèce."
+                answer: "Utilisez la section &apos;Identifier&apos; pour prendre une photo de votre bonsaï et ajouter une description. Notre IA analysera l&apos;image pour identifier l&apos;espèce."
               },
               {
                 question: "À quelle fréquence dois-je arroser mon bonsaï ?",
-                answer: "La fréquence d'arrosage dépend de l'espèce, de la saison et des conditions environnementales. Utilisez nos conseils personnalisés dans la section 'Soins'."
+                answer: "La fréquence d&apos;arrosage dépend de l&apos;espèce, de la saison et des conditions environnementales. Utilisez nos conseils personnalisés dans la section &apos;Soins&apos;."
               },
               {
                 question: "Comment utiliser les conseils de taille ?",
-                answer: "Après avoir identifié votre bonsaï, définissez vos objectifs dans la section 'Taille' pour recevoir des conseils personnalisés de notre IA."
+                answer: "Après avoir identifié votre bonsaï, définissez vos objectifs dans la section &apos;Taille&apos; pour recevoir des conseils personnalisés de notre IA."
               },
               {
                 question: "Puis-je suivre plusieurs bonsaïs ?",
@@ -897,7 +879,7 @@ export default function HomePage() {
         <TabsContent value="guide">
           <Card>
             <CardHeader>
-              <CardTitle>Guide d'utilisation</CardTitle>
+              <CardTitle>Guide d&apos;utilisation</CardTitle>
               <CardDescription>
                 Découvrez toutes les fonctionnalités de BonsAI Assist
               </CardDescription>
@@ -927,7 +909,7 @@ export default function HomePage() {
               <div className="space-y-2">
                 <h3 className="font-semibold">4. Taille</h3>
                 <p className="text-sm text-muted-foreground">
-                  Obtenez des conseils de taille précis basés sur vos objectifs et l'espèce de votre bonsaï.
+                  Obtenez des conseils de taille précis basés sur vos objectifs et l&apos;espèce de votre bonsaï.
                 </p>
               </div>
             </CardContent>
@@ -939,7 +921,7 @@ export default function HomePage() {
             <CardHeader>
               <CardTitle>Contactez-nous</CardTitle>
               <CardDescription>
-                Besoin d'aide ? Notre équipe est là pour vous aider
+                Besoin d&apos;aide ? Notre équipe est là pour vous aider
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import {
   Sidebar,
@@ -10,8 +8,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
 
 interface NavigationProps {
@@ -25,13 +21,13 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
       id: 'dashboard',
       title: 'Tableau de bord',
       icon: Icons.home,
-      description: 'Vue d\'ensemble de vos bonsaïs',
+      description: 'Vue d&apos;ensemble de vos bonsaïs',
     },
     {
       id: 'identify',
       title: 'Identifier',
       icon: Icons.search,
-      description: 'Identification d\'espèces',
+      description: 'Identification d&apos;espèces',
     },
     {
       id: 'collection',
@@ -70,7 +66,7 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
       id: 'tutorials',
       title: 'Tutoriels',
       icon: Icons.file,
-      description: 'Guides d\'apprentissage',
+      description: 'Guides d&apos;apprentissage',
     },
     {
       id: 'community',
@@ -91,7 +87,7 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
       id: 'settings',
       title: 'Paramètres',
       icon: Icons.settings,
-      description: 'Configuration de l\'app',
+      description: 'Configuration de l&apos;app',
     },
     {
       id: 'help',
@@ -166,7 +162,7 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
 
         <div className="mt-auto p-4">
           <p className="text-xs text-muted-foreground text-center">
-            Créez de magnifiques bonsaïs avec l'aide de l'IA
+            Créez de magnifiques bonsaïs avec l&apos;aide de l&apos;IA
           </p>
         </div>
       </SidebarContent>
