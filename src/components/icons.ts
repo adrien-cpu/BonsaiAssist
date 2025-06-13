@@ -2,7 +2,7 @@ import {
   Camera,
   Search,
   Plus,
-  Spinner,
+  Loader2,
   AlertCircle,
   CheckCircle,
   Info,
@@ -117,8 +117,8 @@ export const Icons = {
   share: Share,
   
   // Status
-  spinner: Spinner,
-  loading: Spinner,
+  spinner: Loader2,
+  loading: Loader2,
   alert: AlertCircle,
   success: CheckCircle,
   info: Info,
