@@ -21,7 +21,7 @@ import { useWeather } from '@/hooks/use-weather';
 import { identifySpecies, type IdentifySpeciesOutput } from '@/ai/flows/identify-species';
 import { suggestPruning, type SuggestPruningOutput } from '@/ai/flows/suggest-pruning';
 import { suggestCare, type SuggestCareOutput } from '@/ai/flows/suggest-care';
-import { BonsaiSpecies, CareReminder } from '@/types';
+import { BonsaiSpecies, CareReminder, BonsaiProfile } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -90,8 +90,14 @@ export default function IndexPage() {
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState(false);
   
+  // Collection states
+  const [showAddBonsaiForm, setShowAddBonsaiForm] = useState(false);
+  const [newBonsaiAge, setNewBonsaiAge] = useState<number>(1);
+  const [newBonsaiName, setNewBonsaiName] = useState('');
+  const [newBonsaiLocation, setNewBonsaiLocation] = useState<'indoor' | 'outdoor' | 'greenhouse'>('indoor');
+  
   // Hooks
-  const { bonsaiProfiles, careReminders, addCareReminder, updateCareReminder } = useBonsaiData();
+  const { bonsaiProfiles, careReminders, addCareReminder, updateCareReminder, saveBonsaiProfile } = useBonsaiData();
   const { weather } = useWeather('Paris'); // Default to Paris
 
   // Ensure component is mounted before rendering
@@ -206,6 +212,69 @@ export default function IndexPage() {
     }
   };
 
+  // Collection functions
+  const handleAddToCollection = () => {
+    if (!identificationResult) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: 'Aucune espèce identifiée à ajouter.',
+      });
+      return;
+    }
+
+    setShowAddBonsaiForm(true);
+  };
+
+  const handleSaveToCollection = () => {
+    if (!identificationResult || !newBonsaiName.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: 'Veuillez remplir tous les champs obligatoires.',
+      });
+      return;
+    }
+
+    const newBonsai: BonsaiProfile = {
+      id: Date.now().toString(),
+      name: newBonsaiName.trim(),
+      species: identificationResult.species,
+      age: newBonsaiAge,
+      acquisitionDate: new Date(),
+      photos: [],
+      careHistory: [{
+        date: new Date(),
+        action: 'Ajout à la collection',
+        notes: `Bonsaï identifié avec ${Math.round(identificationResult.confidence * 100)}% de confiance`,
+      }],
+      healthStatus: 'good',
+      lastWatered: new Date(),
+      lastFertilized: new Date(),
+      lastPruned: new Date(),
+      nextCareDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // Dans 3 jours
+      location: newBonsaiLocation,
+      potSize: 'Moyen',
+      soilLastChanged: new Date(),
+    };
+
+    saveBonsaiProfile(newBonsai);
+    
+    // Reset form
+    setShowAddBonsaiForm(false);
+    setNewBonsaiName('');
+    setNewBonsaiAge(1);
+    setNewBonsaiLocation('indoor');
+    
+    toast({
+      title: 'Bonsaï ajouté !',
+      description: `${newBonsai.name} a été ajouté à votre collection.`,
+    });
+
+    // Optionally switch to collection page
+    setCurrentPage('collection');
+  };
+
   // Page rendering functions
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -316,9 +385,9 @@ export default function IndexPage() {
             Gérez et suivez l'évolution de vos bonsaïs
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setCurrentPage('identify')}>
           <Icons.plus className="h-4 w-4 mr-2" />
-          Ajouter un bonsaï
+          Identifier un nouveau bonsaï
         </Button>
       </div>
 
@@ -345,11 +414,11 @@ export default function IndexPage() {
             <Icons.tree className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">Aucun bonsaï dans votre collection</h3>
             <p className="text-muted-foreground mb-4">
-              Commencez par ajouter votre premier bonsaï pour suivre son évolution
+              Commencez par identifier votre premier bonsaï pour l'ajouter à votre collection
             </p>
-            <Button>
-              <Icons.plus className="h-4 w-4 mr-2" />
-              Ajouter mon premier bonsaï
+            <Button onClick={() => setCurrentPage('identify')}>
+              <Icons.search className="h-4 w-4 mr-2" />
+              Identifier mon premier bonsaï
             </Button>
           </CardContent>
         </Card>
@@ -440,7 +509,7 @@ export default function IndexPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Identification d'espèces</h1>
         <p className="text-muted-foreground">
-          Utilisez l'IA pour identifier votre bonsaï
+          Utilisez l'IA pour identifier votre bonsaï et l'ajouter à votre collection
         </p>
       </div>
 
@@ -540,6 +609,80 @@ export default function IndexPage() {
                 </p>
               </div>
               <p className="text-sm">{identificationResult.characteristics}</p>
+              
+              {/* Formulaire d'ajout à la collection */}
+              {!showAddBonsaiForm ? (
+                <div className="flex gap-2 pt-4">
+                  <Button onClick={handleAddToCollection} className="flex-1">
+                    <Icons.plus className="h-4 w-4 mr-2" />
+                    Ajouter à ma collection
+                  </Button>
+                  <Button variant="outline" onClick={() => setCurrentPage('pruning')}>
+                    <Icons.scissors className="h-4 w-4 mr-2" />
+                    Obtenir des conseils de taille
+                  </Button>
+                </div>
+              ) : (
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Ajouter à votre collection</CardTitle>
+                    <CardDescription>
+                      Complétez les informations pour ajouter ce bonsaï à votre collection
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium">Nom du bonsaï *</label>
+                      <Input
+                        placeholder="ex: Mon érable du jardin"
+                        value={newBonsaiName}
+                        onChange={(e) => setNewBonsaiName(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium">Âge estimé (années)</label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={newBonsaiAge}
+                        onChange={(e) => setNewBonsaiAge(parseInt(e.target.value) || 1)}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        L'IA ne peut pas déterminer l'âge précis. Estimez selon la taille du tronc et l'apparence générale.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium">Emplacement</label>
+                      <select 
+                        className="w-full p-2 border rounded-md"
+                        value={newBonsaiLocation}
+                        onChange={(e) => setNewBonsaiLocation(e.target.value as 'indoor' | 'outdoor' | 'greenhouse')}
+                      >
+                        <option value="indoor">Intérieur</option>
+                        <option value="outdoor">Extérieur</option>
+                        <option value="greenhouse">Serre</option>
+                      </select>
+                    </div>
+                    
+                    <div className="flex gap-2 pt-2">
+                      <Button onClick={handleSaveToCollection} className="flex-1">
+                        <Icons.save className="h-4 w-4 mr-2" />
+                        Sauvegarder
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowAddBonsaiForm(false)}
+                        className="flex-1"
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </CardContent>
         </Card>
