@@ -79,11 +79,6 @@ export default function HomePage() {
       
       if (ctx) {
         ctx.drawImage(video, 0, 0);
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        
         const imageData = canvas.toDataURL('image/jpeg');
         setSelectedImage(imageData);
       }

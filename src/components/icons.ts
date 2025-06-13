@@ -212,9 +212,11 @@ export const Icons = {
   // Communication
   message: MessageCircle,
   
+  // Additional icons needed
+  users: Users,
+  
   // Learning & Community
   book: BookOpen,
-  users: Users,
   award: Award,
   target: Target,
 } as const
