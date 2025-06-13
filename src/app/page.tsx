@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Navigation } from '@/components/layout/navigation';
 import { DashboardStats } from '@/components/bonsai/dashboard-stats';
 import { CareCalendar } from '@/components/bonsai/care-calendar';
@@ -13,6 +13,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Icons } from '@/components/icons';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { useBonsaiData } from '@/hooks/use-bonsai-data';
@@ -20,7 +24,7 @@ import { useWeather } from '@/hooks/use-weather';
 import { identifySpecies } from '@/ai/flows/identify-species';
 import { suggestPruning } from '@/ai/flows/suggest-pruning';
 import { suggestCare } from '@/ai/flows/suggest-care';
-import { BonsaiProfile, BonsaiSpecies, CareReminder, WeatherData } from '@/types';
+import { BonsaiProfile, BonsaiSpecies, CareReminder, WeatherData, UserPreferences } from '@/types';
 
 // Mock data pour les espèces
 const mockSpecies: BonsaiSpecies[] = [
@@ -92,6 +96,39 @@ const mockWeather: WeatherData = {
   ],
 };
 
+// Mock user profile data
+const mockUserProfile = {
+  name: 'Jean Dupont',
+  email: 'jean.dupont@email.com',
+  avatar: '',
+  joinDate: new Date('2024-01-15'),
+  level: 'Intermédiaire',
+  totalBonsai: 0,
+  experienceYears: 3,
+  favoriteSpecies: 'Érable japonais',
+  location: 'Paris, France'
+};
+
+const mockUserPreferences: UserPreferences = {
+  notifications: {
+    watering: true,
+    fertilizing: true,
+    pruning: true,
+    weather: false
+  },
+  units: {
+    temperature: 'celsius',
+    measurement: 'metric'
+  },
+  language: 'fr',
+  theme: 'auto',
+  location: {
+    city: 'Paris',
+    country: 'France',
+    timezone: 'Europe/Paris'
+  }
+};
+
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [identificationResult, setIdentificationResult] = useState<any>(null);
@@ -101,8 +138,61 @@ export default function HomePage() {
   const [description, setDescription] = useState('');
   const [pruningSuggestions, setPruningSuggestions] = useState<any>(null);
   const [careSuggestions, setCareSuggestions] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState(mockUserProfile);
+  const [userPreferences, setUserPreferences] = useState(mockUserPreferences);
+  const [isUsingCamera, setIsUsingCamera] = useState(false);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { bonsaiProfiles, careReminders, saveBonsaiProfile, addCareReminder } = useBonsaiData();
+
+  // Fonction pour démarrer la caméra
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } // Utilise la caméra arrière sur mobile
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        setIsUsingCamera(true);
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'accès à la caméra:', error);
+      // Fallback vers l'upload de fichier
+      fileInputRef.current?.click();
+    }
+  };
+
+  // Fonction pour arrêter la caméra
+  const stopCamera = () => {
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+      setIsUsingCamera(false);
+    }
+  };
+
+  // Fonction pour prendre une photo
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        setPhotoPreview(dataUrl);
+        stopCamera();
+      }
+    }
+  };
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -140,7 +230,7 @@ export default function HomePage() {
       id: Date.now().toString(),
       name: `Mon ${identificationResult.species}`,
       species: identificationResult.species,
-      age: 0, // À définir par l'utilisateur
+      age: 0,
       acquisitionDate: new Date(),
       photos: photoPreview ? [{
         id: Date.now().toString(),
@@ -240,29 +330,74 @@ export default function HomePage() {
               Photo du bonsaï
             </CardTitle>
             <CardDescription>
-              Prenez une photo claire de votre bonsaï
+              Prenez une photo ou sélectionnez une image de votre bonsaï
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-              {photoPreview ? (
-                <img 
-                  src={photoPreview} 
-                  alt="Aperçu" 
-                  className="max-w-full h-48 object-cover mx-auto rounded-lg"
-                />
+              {isUsingCamera ? (
+                <div className="space-y-4">
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline
+                    className="w-full max-w-md mx-auto rounded-lg"
+                  />
+                  <div className="flex gap-2 justify-center">
+                    <Button onClick={capturePhoto}>
+                      <Icons.camera className="h-4 w-4 mr-2" />
+                      Prendre la photo
+                    </Button>
+                    <Button variant="outline" onClick={stopCamera}>
+                      Annuler
+                    </Button>
+                  </div>
+                </div>
+              ) : photoPreview ? (
+                <div className="space-y-4">
+                  <img 
+                    src={photoPreview} 
+                    alt="Aperçu" 
+                    className="max-w-full h-48 object-cover mx-auto rounded-lg"
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setPhotoPreview('');
+                      setPhotoFile(null);
+                    }}
+                  >
+                    Changer la photo
+                  </Button>
+                </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Icons.camera className="h-12 w-12 mx-auto text-muted-foreground" />
-                  <p className="text-muted-foreground">Cliquez pour ajouter une photo</p>
+                  <p className="text-muted-foreground">Prenez une photo ou sélectionnez une image</p>
+                  <div className="flex gap-2 justify-center">
+                    <Button onClick={startCamera}>
+                      <Icons.camera className="h-4 w-4 mr-2" />
+                      Utiliser l'appareil photo
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Icons.upload className="h-4 w-4 mr-2" />
+                      Choisir un fichier
+                    </Button>
+                  </div>
                 </div>
               )}
+              
               <Input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoUpload}
-                className="mt-4"
+                className="hidden"
               />
+              <canvas ref={canvasRef} className="hidden" />
             </div>
 
             <div className="space-y-2">
@@ -533,6 +668,339 @@ export default function HomePage() {
     </div>
   );
 
+  const renderProfile = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Mon Profil</h1>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Informations personnelles */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icons.user className="h-5 w-5" />
+              Informations personnelles
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={userProfile.avatar} />
+                <AvatarFallback className="text-lg">
+                  {userProfile.name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg">{userProfile.name}</h3>
+                <p className="text-muted-foreground">{userProfile.email}</p>
+                <Badge variant="outline" className="mt-1">
+                  Niveau {userProfile.level}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Nom complet</Label>
+                <Input 
+                  id="name" 
+                  value={userProfile.name}
+                  onChange={(e) => setUserProfile({...userProfile, name: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email"
+                  value={userProfile.email}
+                  onChange={(e) => setUserProfile({...userProfile, email: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="location">Localisation</Label>
+                <Input 
+                  id="location" 
+                  value={userProfile.location}
+                  onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="experience">Années d'expérience</Label>
+                <Input 
+                  id="experience" 
+                  type="number"
+                  value={userProfile.experienceYears}
+                  onChange={(e) => setUserProfile({...userProfile, experienceYears: parseInt(e.target.value)})}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="favorite">Espèce favorite</Label>
+              <Input 
+                id="favorite" 
+                value={userProfile.favoriteSpecies}
+                onChange={(e) => setUserProfile({...userProfile, favoriteSpecies: e.target.value})}
+              />
+            </div>
+
+            <Button className="w-full">
+              <Icons.save className="h-4 w-4 mr-2" />
+              Sauvegarder les modifications
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Statistiques */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icons.barChart className="h-5 w-5" />
+              Mes statistiques
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-4 bg-muted rounded-lg">
+                <div className="text-2xl font-bold text-primary">{bonsaiProfiles.length}</div>
+                <div className="text-sm text-muted-foreground">Bonsaïs</div>
+              </div>
+              <div className="text-center p-4 bg-muted rounded-lg">
+                <div className="text-2xl font-bold text-primary">{userProfile.experienceYears}</div>
+                <div className="text-sm text-muted-foreground">Années d'expérience</div>
+              </div>
+              <div className="text-center p-4 bg-muted rounded-lg">
+                <div className="text-2xl font-bold text-primary">
+                  {Math.floor((new Date().getTime() - userProfile.joinDate.getTime()) / (1000 * 60 * 60 * 24))}
+                </div>
+                <div className="text-sm text-muted-foreground">Jours sur l'app</div>
+              </div>
+              <div className="text-center p-4 bg-muted rounded-lg">
+                <div className="text-2xl font-bold text-primary">
+                  {careReminders.filter(r => r.isCompleted).length}
+                </div>
+                <div className="text-sm text-muted-foreground">Soins effectués</div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-medium">Progression</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Niveau actuel</span>
+                  <span>{userProfile.level}</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div className="bg-primary h-2 rounded-full" style={{width: '65%'}}></div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Continuez à prendre soin de vos bonsaïs pour progresser !
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-medium">Badges obtenus</h4>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline">
+                  <Icons.tree className="h-3 w-3 mr-1" />
+                  Premier bonsaï
+                </Badge>
+                <Badge variant="outline">
+                  <Icons.droplets className="h-3 w-3 mr-1" />
+                  Arrosage régulier
+                </Badge>
+                <Badge variant="outline">
+                  <Icons.calendar className="h-3 w-3 mr-1" />
+                  Utilisateur actif
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Préférences */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Icons.settings className="h-5 w-5" />
+            Préférences
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="notifications" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
+              <TabsTrigger value="units">Unités</TabsTrigger>
+              <TabsTrigger value="appearance">Apparence</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="notifications" className="space-y-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="watering-notif">Rappels d'arrosage</Label>
+                    <p className="text-sm text-muted-foreground">Recevoir des notifications pour l'arrosage</p>
+                  </div>
+                  <Switch 
+                    id="watering-notif"
+                    checked={userPreferences.notifications.watering}
+                    onCheckedChange={(checked) => 
+                      setUserPreferences({
+                        ...userPreferences,
+                        notifications: {...userPreferences.notifications, watering: checked}
+                      })
+                    }
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="fertilizing-notif">Rappels de fertilisation</Label>
+                    <p className="text-sm text-muted-foreground">Recevoir des notifications pour la fertilisation</p>
+                  </div>
+                  <Switch 
+                    id="fertilizing-notif"
+                    checked={userPreferences.notifications.fertilizing}
+                    onCheckedChange={(checked) => 
+                      setUserPreferences({
+                        ...userPreferences,
+                        notifications: {...userPreferences.notifications, fertilizing: checked}
+                      })
+                    }
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="pruning-notif">Rappels de taille</Label>
+                    <p className="text-sm text-muted-foreground">Recevoir des notifications pour la taille</p>
+                  </div>
+                  <Switch 
+                    id="pruning-notif"
+                    checked={userPreferences.notifications.pruning}
+                    onCheckedChange={(checked) => 
+                      setUserPreferences({
+                        ...userPreferences,
+                        notifications: {...userPreferences.notifications, pruning: checked}
+                      })
+                    }
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="weather-notif">Alertes météo</Label>
+                    <p className="text-sm text-muted-foreground">Recevoir des alertes météorologiques</p>
+                  </div>
+                  <Switch 
+                    id="weather-notif"
+                    checked={userPreferences.notifications.weather}
+                    onCheckedChange={(checked) => 
+                      setUserPreferences({
+                        ...userPreferences,
+                        notifications: {...userPreferences.notifications, weather: checked}
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="units" className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="temperature-unit">Unité de température</Label>
+                  <Select 
+                    value={userPreferences.units.temperature}
+                    onValueChange={(value: 'celsius' | 'fahrenheit') => 
+                      setUserPreferences({
+                        ...userPreferences,
+                        units: {...userPreferences.units, temperature: value}
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="celsius">Celsius (°C)</SelectItem>
+                      <SelectItem value="fahrenheit">Fahrenheit (°F)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="measurement-unit">Système de mesure</Label>
+                  <Select 
+                    value={userPreferences.units.measurement}
+                    onValueChange={(value: 'metric' | 'imperial') => 
+                      setUserPreferences({
+                        ...userPreferences,
+                        units: {...userPreferences.units, measurement: value}
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="metric">Métrique</SelectItem>
+                      <SelectItem value="imperial">Impérial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="appearance" className="space-y-4">
+              <div>
+                <Label htmlFor="theme">Thème</Label>
+                <Select 
+                  value={userPreferences.theme}
+                  onValueChange={(value: 'light' | 'dark' | 'auto') => 
+                    setUserPreferences({...userPreferences, theme: value})
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Clair</SelectItem>
+                    <SelectItem value="dark">Sombre</SelectItem>
+                    <SelectItem value="auto">Automatique</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="language">Langue</Label>
+                <Select 
+                  value={userPreferences.language}
+                  onValueChange={(value) => 
+                    setUserPreferences({...userPreferences, language: value})
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   const renderSettings = () => (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Paramètres</h1>
@@ -541,7 +1009,22 @@ export default function HomePage() {
           <Icons.settings className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">Paramètres</h3>
           <p className="text-muted-foreground">
-            Les paramètres seront bientôt disponibles
+            Les paramètres avancés seront bientôt disponibles
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderHelp = () => (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Aide</h1>
+      <Card>
+        <CardContent className="text-center py-12">
+          <Icons.info className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Centre d'aide</h3>
+          <p className="text-muted-foreground">
+            La documentation et l'aide seront bientôt disponibles
           </p>
         </CardContent>
       </Card>
@@ -559,7 +1042,9 @@ export default function HomePage() {
       case 'weather': return renderWeather();
       case 'tutorials': return renderTutorials();
       case 'community': return renderCommunity();
+      case 'profile': return renderProfile();
       case 'settings': return renderSettings();
+      case 'help': return renderHelp();
       default: return renderDashboard();
     }
   };
