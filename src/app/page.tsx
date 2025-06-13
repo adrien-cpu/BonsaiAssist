@@ -54,43 +54,115 @@ export default function HomePage() {
 
   const handleCameraCapture = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      
-      // Créer un élément video temporaire
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.autoplay = true;
-      video.muted = true;
-      video.play();
-      
-      // Attendre que la vidéo soit prête
-      await new Promise((resolve) => {
-        video.addEventListener('loadedmetadata', resolve, { once: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'environment' // Utilise la caméra arrière si disponible
+        } 
       });
       
-      // Attendre un court délai pour que l'image se stabilise
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Créer un modal pour afficher la caméra
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      `;
       
-      // Créer le canvas et capturer l'image
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
+      const video = document.createElement('video');
+      video.style.cssText = `
+        max-width: 90%;
+        max-height: 70%;
+        border-radius: 8px;
+      `;
+      video.autoplay = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.srcObject = stream;
       
-      if (ctx) {
-        ctx.drawImage(video, 0, 0);
-        const imageData = canvas.toDataURL('image/jpeg');
-        setSelectedImage(imageData);
-      }
+      const captureButton = document.createElement('button');
+      captureButton.textContent = 'Capturer';
+      captureButton.style.cssText = `
+        margin-top: 20px;
+        padding: 12px 24px;
+        background: #386641;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+      `;
       
-      // Arrêter le stream
-      stream.getTracks().forEach(track => track.stop());
+      const cancelButton = document.createElement('button');
+      cancelButton.textContent = 'Annuler';
+      cancelButton.style.cssText = `
+        margin-top: 10px;
+        padding: 8px 16px;
+        background: transparent;
+        color: white;
+        border: 1px solid white;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+      `;
+      
+      modal.appendChild(video);
+      modal.appendChild(captureButton);
+      modal.appendChild(cancelButton);
+      document.body.appendChild(modal);
+      
+      const cleanup = () => {
+        stream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(modal);
+      };
+      
+      cancelButton.addEventListener('click', cleanup);
+      
+      captureButton.addEventListener('click', () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          
+          if (ctx && video.videoWidth > 0 && video.videoHeight > 0) {
+            ctx.drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+            setSelectedImage(imageData);
+            
+            toast({
+              title: "Photo capturée",
+              description: "L'image a été capturée avec succès",
+            });
+          } else {
+            throw new Error('Impossible de capturer l\'image');
+          }
+        } catch (error) {
+          console.error('Capture error:', error);
+          toast({
+            title: "Erreur de capture",
+            description: "Impossible de capturer l'image",
+            variant: "destructive"
+          });
+        } finally {
+          cleanup();
+        }
+      });
       
     } catch (error) {
       console.error('Camera error:', error);
       toast({
         title: "Erreur",
-        description: "Impossible d&apos;accéder à l&apos;appareil photo",
+        description: "Impossible d'accéder à l'appareil photo. Vérifiez les permissions.",
         variant: "destructive"
       });
     }
