@@ -64,6 +64,7 @@ import {
   VolumeX,
   Play,
   Pause,
+  Stop,
   SkipBack,
   SkipForward,
   Repeat,
@@ -91,6 +92,11 @@ import {
   Gamepad2,
   Joystick,
   MessageCircle,
+  BookOpen,
+  Users,
+  TrendingUp,
+  Award,
+  Target,
   type LucideIcon,
 } from "lucide-react"
 
@@ -151,6 +157,7 @@ export const Icons = {
   // Data & Analytics
   activity: Activity,
   barChart: BarChart3,
+  trendingUp: TrendingUp,
   
   // Location
   mapPin: MapPin,
@@ -168,6 +175,7 @@ export const Icons = {
   volumeOff: VolumeX,
   play: Play,
   pause: Pause,
+  stop: Stop,
   
   // Interaction
   heart: Heart,
@@ -216,6 +224,12 @@ export const Icons = {
   
   // Communication
   message: MessageCircle,
+  
+  // Learning & Community
+  book: BookOpen,
+  users: Users,
+  award: Award,
+  target: Target,
 } as const
 
 export type IconName = keyof typeof Icons
