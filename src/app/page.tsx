@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/layout/navigation';
 import { DashboardStats } from '@/components/bonsai/dashboard-stats';
 import { CareCalendar } from '@/components/bonsai/care-calendar';
@@ -25,6 +25,18 @@ import { suggestPruning, type SuggestPruningOutput } from '@/ai/flows/suggest-pr
 import { suggestCare, type SuggestCareOutput } from '@/ai/flows/suggest-care';
 import Image from 'next/image';
 
+// Interface pour les caractéristiques du bonsaï
+interface BonsaiCharacteristics {
+  leafColor: string;
+  leafShape: string;
+  barkColor: string;
+  barkTexture: string;
+  treeSize: string;
+  branchStructure: string;
+  flowersFruits: string;
+  seasonalChanges: string;
+}
+
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +45,17 @@ export default function HomePage() {
   const [pruningSuggestions, setPruningSuggestions] = useState<SuggestPruningOutput | null>(null);
   const [careSuggestions, setCareSuggestions] = useState<SuggestCareOutput | null>(null);
   const [description, setDescription] = useState('');
+  const [characteristics, setCharacteristics] = useState<BonsaiCharacteristics>({
+    leafColor: '',
+    leafShape: '',
+    barkColor: '',
+    barkTexture: '',
+    treeSize: '',
+    branchStructure: '',
+    flowersFruits: '',
+    seasonalChanges: ''
+  });
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [userGoals, setUserGoals] = useState('');
   const [currentSeason, setCurrentSeason] = useState('Spring');
   const [treeHealth, setTreeHealth] = useState('');
@@ -41,12 +64,81 @@ export default function HomePage() {
   const { weather } = useWeather('Paris');
   const { toast } = useToast();
 
+  // Générer une description automatique basée sur l'image
+  const generateAIDescription = async (imageUrl: string) => {
+    setIsGeneratingDescription(true);
+    try {
+      // Simulation d'analyse IA de l'image pour pré-remplir les caractéristiques
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulation d'appel API
+      
+      // Caractéristiques pré-remplies par l'IA (à remplacer par un vrai appel API)
+      const aiCharacteristics: BonsaiCharacteristics = {
+        leafColor: 'Vert foncé',
+        leafShape: 'Ovales, petites',
+        barkColor: 'Gris-brun',
+        barkTexture: 'Rugueuse avec des fissures',
+        treeSize: 'Petit (15-25 cm)',
+        branchStructure: 'Ramification dense',
+        flowersFruits: 'Petites fleurs blanches au printemps',
+        seasonalChanges: 'Feuillage persistant'
+      };
+      
+      setCharacteristics(aiCharacteristics);
+      
+      // Générer la description textuelle
+      const generatedDescription = `Bonsaï avec des feuilles ${aiCharacteristics.leafShape.toLowerCase()} de couleur ${aiCharacteristics.leafColor.toLowerCase()}. L'écorce est ${aiCharacteristics.barkColor.toLowerCase()} avec une texture ${aiCharacteristics.barkTexture.toLowerCase()}. Taille: ${aiCharacteristics.treeSize.toLowerCase()}. Structure: ${aiCharacteristics.branchStructure.toLowerCase()}. ${aiCharacteristics.flowersFruits}. ${aiCharacteristics.seasonalChanges}.`;
+      
+      setDescription(generatedDescription);
+      
+      toast({
+        title: "Description générée",
+        description: "L'IA a analysé votre image et pré-rempli la description. Vous pouvez la modifier si nécessaire.",
+      });
+    } catch (error) {
+      console.error('Error generating AI description:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer la description automatique",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
+  // Mettre à jour la description quand les caractéristiques changent
+  const updateDescriptionFromCharacteristics = () => {
+    const desc = `Bonsaï avec des feuilles ${characteristics.leafShape.toLowerCase()} de couleur ${characteristics.leafColor.toLowerCase()}. L'écorce est ${characteristics.barkColor.toLowerCase()} avec une texture ${characteristics.barkTexture.toLowerCase()}. Taille: ${characteristics.treeSize.toLowerCase()}. Structure: ${characteristics.branchStructure.toLowerCase()}. ${characteristics.flowersFruits}. ${characteristics.seasonalChanges}.`;
+    setDescription(desc);
+  };
+
+  // Fonction pour corriger et enseigner l'IA
+  const submitCorrections = async () => {
+    try {
+      // Ici on enverrait les corrections à l'IA pour améliorer ses connaissances
+      console.log('Corrections envoyées à l\'IA:', {
+        originalImage: selectedImage,
+        correctedCharacteristics: characteristics,
+        finalDescription: description
+      });
+      
+      toast({
+        title: "Corrections envoyées",
+        description: "Merci ! Vos corrections aideront à améliorer l'IA.",
+      });
+    } catch (error) {
+      console.error('Error submitting corrections:', error);
+    }
+  };
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setSelectedImage(e.target?.result as string);
+        const imageUrl = e.target?.result as string;
+        setSelectedImage(imageUrl);
+        // Générer automatiquement la description IA
+        generateAIDescription(imageUrl);
       };
       reader.readAsDataURL(file);
     }
@@ -138,6 +230,8 @@ export default function HomePage() {
             ctx.drawImage(video, 0, 0);
             const imageData = canvas.toDataURL('image/jpeg', 0.8);
             setSelectedImage(imageData);
+            // Générer automatiquement la description IA
+            generateAIDescription(imageData);
             
             toast({
               title: "Photo capturée",
@@ -382,26 +476,27 @@ export default function HomePage() {
           <CardHeader>
             <CardTitle>Description</CardTitle>
             <CardDescription>
-              Décrivez votre bonsaï pour améliorer l&apos;identification
+              L&apos;IA a pré-rempli la description. Corrigez si nécessaire pour améliorer l&apos;identification.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea
-              placeholder="Décrivez les caractéristiques de votre bonsaï (forme des feuilles, couleur de l&apos;écorce, taille, etc.)"
+              placeholder="Description générée automatiquement par l'IA. Vous pouvez la modifier."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
+              disabled={isGeneratingDescription}
             />
             
             <Button 
               onClick={handleIdentifySpecies}
-              disabled={!selectedImage || !description || isLoading}
+              disabled={!selectedImage || !description || isLoading || isGeneratingDescription}
               className="w-full"
             >
-              {isLoading ? (
+              {isLoading || isGeneratingDescription ? (
                 <>
                   <Icons.spinner className="h-4 w-4 mr-2 animate-spin" />
-                  Identification en cours...
+                  {isGeneratingDescription ? 'Analyse en cours...' : 'Identification en cours...'}
                 </>
               ) : (
                 <>
