@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Icons } from '@/components/icons';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { useBonsaiData } from '@/hooks/use-bonsai-data';
@@ -334,9 +335,10 @@ export default function HomePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+            {/* Zone de capture/upload photo */}
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[300px] flex flex-col items-center justify-center">
               {isUsingCamera ? (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full">
                   <video 
                     ref={videoRef} 
                     autoPlay 
@@ -344,21 +346,21 @@ export default function HomePage() {
                     className="w-full max-w-md mx-auto rounded-lg"
                   />
                   <div className="flex gap-2 justify-center">
-                    <Button onClick={capturePhoto}>
-                      <Icons.camera className="h-4 w-4 mr-2" />
+                    <Button onClick={capturePhoto} size="lg">
+                      <Icons.camera className="h-5 w-5 mr-2" />
                       Prendre la photo
                     </Button>
-                    <Button variant="outline" onClick={stopCamera}>
+                    <Button variant="outline" onClick={stopCamera} size="lg">
                       Annuler
                     </Button>
                   </div>
                 </div>
               ) : photoPreview ? (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full">
                   <img 
                     src={photoPreview} 
                     alt="Aperçu" 
-                    className="max-w-full h-48 object-cover mx-auto rounded-lg"
+                    className="max-w-full h-64 object-cover mx-auto rounded-lg border"
                   />
                   <Button 
                     variant="outline" 
@@ -366,24 +368,36 @@ export default function HomePage() {
                       setPhotoPreview('');
                       setPhotoFile(null);
                     }}
+                    size="lg"
                   >
+                    <Icons.edit className="h-4 w-4 mr-2" />
                     Changer la photo
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <Icons.camera className="h-12 w-12 mx-auto text-muted-foreground" />
-                  <p className="text-muted-foreground">Prenez une photo ou sélectionnez une image</p>
-                  <div className="flex gap-2 justify-center">
-                    <Button onClick={startCamera}>
-                      <Icons.camera className="h-4 w-4 mr-2" />
+                <div className="space-y-6 w-full">
+                  <div className="space-y-3">
+                    <Icons.camera className="h-16 w-16 mx-auto text-muted-foreground" />
+                    <div className="space-y-1">
+                      <h3 className="font-medium text-lg">Prenez une photo ou sélectionnez une image</h3>
+                      <p className="text-muted-foreground text-sm">
+                        Capturez votre bonsaï sous un bon éclairage pour une meilleure identification
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button onClick={startCamera} size="lg" className="flex-1 sm:flex-none">
+                      <Icons.camera className="h-5 w-5 mr-2" />
                       Utiliser l'appareil photo
                     </Button>
                     <Button 
                       variant="outline" 
                       onClick={() => fileInputRef.current?.click()}
+                      size="lg"
+                      className="flex-1 sm:flex-none"
                     >
-                      <Icons.upload className="h-4 w-4 mr-2" />
+                      <Icons.upload className="h-5 w-5 mr-2" />
                       Choisir un fichier
                     </Button>
                   </div>
@@ -401,28 +415,33 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
+              <Label className="text-sm font-medium">Description du bonsaï</Label>
               <Textarea
-                placeholder="Décrivez votre bonsaï (forme des feuilles, couleur, taille...)"
+                placeholder="Décrivez votre bonsaï : forme des feuilles, couleur, taille, type d'écorce, etc."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
+                className="resize-none"
               />
+              <p className="text-xs text-muted-foreground">
+                Plus votre description est détaillée, plus l'identification sera précise.
+              </p>
             </div>
 
             <Button 
               onClick={handleIdentifySpecies}
               disabled={!photoPreview || !description || isIdentifying}
               className="w-full"
+              size="lg"
             >
               {isIdentifying ? (
                 <>
-                  <Icons.loading className="h-4 w-4 mr-2 animate-spin" />
+                  <Icons.loading className="h-5 w-5 mr-2 animate-spin" />
                   Identification en cours...
                 </>
               ) : (
                 <>
-                  <Icons.search className="h-4 w-4 mr-2" />
+                  <Icons.search className="h-5 w-5 mr-2" />
                   Identifier l'espèce
                 </>
               )}
@@ -1018,16 +1037,244 @@ export default function HomePage() {
 
   const renderHelp = () => (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Aide</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Centre d'aide</h1>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Guide de démarrage */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icons.book className="h-5 w-5 text-blue-600" />
+              Guide de démarrage
+            </CardTitle>
+            <CardDescription>
+              Apprenez les bases de BonsAI Assist
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-2">
+              <Button variant="ghost" className="w-full justify-start h-auto p-3">
+                <div className="text-left">
+                  <div className="font-medium">Première utilisation</div>
+                  <div className="text-sm text-muted-foreground">Configuration initiale de l'app</div>
+                </div>
+              </Button>
+              <Button variant="ghost" className="w-full justify-start h-auto p-3">
+                <div className="text-left">
+                  <div className="font-medium">Identifier un bonsaï</div>
+                  <div className="text-sm text-muted-foreground">Comment utiliser l'IA d'identification</div>
+                </div>
+              </Button>
+              <Button variant="ghost" className="w-full justify-start h-auto p-3">
+                <div className="text-left">
+                  <div className="font-medium">Gérer sa collection</div>
+                  <div className="text-sm text-muted-foreground">Ajouter et organiser vos bonsaïs</div>
+                </div>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Fonctionnalités */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icons.star className="h-5 w-5 text-yellow-600" />
+              Fonctionnalités
+            </CardTitle>
+            <CardDescription>
+              Découvrez toutes les possibilités
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-2">
+              <Button variant="ghost" className="w-full justify-start h-auto p-3">
+                <div className="text-left">
+                  <div className="font-medium">Soins intelligents</div>
+                  <div className="text-sm text-muted-foreground">Rappels adaptatifs selon la météo</div>
+                </div>
+              </Button>
+              <Button variant="ghost" className="w-full justify-start h-auto p-3">
+                <div className="text-left">
+                  <div className="font-medium">Guide de taille IA</div>
+                  <div className="text-sm text-muted-foreground">Suggestions personnalisées</div>
+                </div>
+              </Button>
+              <Button variant="ghost" className="w-full justify-start h-auto p-3">
+                <div className="text-left">
+                  <div className="font-medium">Visualisation 3D</div>
+                  <div className="text-sm text-muted-foreground">Prévisualisation des coupes</div>
+                </div>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Support */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icons.message className="h-5 w-5 text-green-600" />
+              Support
+            </CardTitle>
+            <CardDescription>
+              Besoin d'aide ? Contactez-nous
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button className="w-full">
+              <Icons.message className="h-4 w-4 mr-2" />
+              Chat en direct
+            </Button>
+            <Button variant="outline" className="w-full">
+              <Icons.mail className="h-4 w-4 mr-2" />
+              Envoyer un email
+            </Button>
+            <Button variant="outline" className="w-full">
+              <Icons.phone className="h-4 w-4 mr-2" />
+              Nous appeler
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* FAQ */}
       <Card>
-        <CardContent className="text-center py-12">
-          <Icons.info className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Centre d'aide</h3>
-          <p className="text-muted-foreground">
-            La documentation et l'aide seront bientôt disponibles
-          </p>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Icons.info className="h-5 w-5" />
+            Questions fréquentes (FAQ)
+          </CardTitle>
+          <CardDescription>
+            Trouvez rapidement des réponses à vos questions
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>Comment l'IA identifie-t-elle les espèces de bonsaï ?</AccordionTrigger>
+              <AccordionContent>
+                Notre IA utilise un modèle de vision par ordinateur entraîné sur des milliers d'images de bonsaïs. 
+                Elle analyse les caractéristiques visuelles comme la forme des feuilles, l'écorce, la structure des branches 
+                et les compare avec votre description textuelle pour fournir une identification précise.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2">
+              <AccordionTrigger>Puis-je utiliser l'app sans connexion internet ?</AccordionTrigger>
+              <AccordionContent>
+                Certaines fonctionnalités comme la consultation de votre collection et les rappels de soins fonctionnent hors ligne. 
+                Cependant, l'identification d'espèces, les suggestions de taille IA et les données météo nécessitent une connexion internet.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3">
+              <AccordionTrigger>Comment les rappels de soins s'adaptent-ils à la météo ?</AccordionTrigger>
+              <AccordionContent>
+                L'application surveille les conditions météorologiques locales et ajuste automatiquement vos rappels d'arrosage. 
+                Par exemple, elle retardera les notifications d'arrosage s'il pleut ou les avancera en cas de forte chaleur.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4">
+              <AccordionTrigger>Mes données sont-elles sécurisées ?</AccordionTrigger>
+              <AccordionContent>
+                Oui, toutes vos données sont chiffrées et stockées de manière sécurisée. Vos photos et informations personnelles 
+                ne sont jamais partagées avec des tiers. Vous pouvez consulter notre politique de confidentialité pour plus de détails.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-5">
+              <AccordionTrigger>Comment améliorer la précision de l'identification ?</AccordionTrigger>
+              <AccordionContent>
+                Pour une meilleure identification :
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Prenez des photos nettes avec un bon éclairage</li>
+                  <li>Incluez les feuilles, l'écorce et la structure générale</li>
+                  <li>Ajoutez une description détaillée (couleur, texture, taille)</li>
+                  <li>Photographiez sous plusieurs angles si possible</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-6">
+              <AccordionTrigger>Puis-je modifier les informations d'un bonsaï après l'avoir ajouté ?</AccordionTrigger>
+              <AccordionContent>
+                Absolument ! Vous pouvez modifier toutes les informations de vos bonsaïs à tout moment : nom, âge, emplacement, 
+                notes de soins, etc. Accédez simplement à votre collection et sélectionnez le bonsaï à modifier.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-7">
+              <AccordionTrigger>L'app fonctionne-t-elle pour tous les types de bonsaï ?</AccordionTrigger>
+              <AccordionContent>
+                Notre base de données couvre plus de 200 espèces couramment utilisées en bonsaï, incluant les espèces tropicales, 
+                tempérées et méditerranéennes. Si votre espèce n'est pas reconnue, vous pouvez nous la signaler pour l'ajouter 
+                aux futures mises à jour.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-8">
+              <AccordionTrigger>Comment fonctionne la visualisation 3D ?</AccordionTrigger>
+              <AccordionContent>
+                La visualisation 3D (bientôt disponible) créera un modèle tridimensionnel de votre bonsaï à partir de photos. 
+                Vous pourrez voir l'impact des coupes suggérées avant de les effectuer, facilitant ainsi vos décisions de taille.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </CardContent>
       </Card>
+
+      {/* Ressources supplémentaires */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icons.video className="h-5 w-5" />
+              Tutoriels vidéo
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full justify-start">
+              <Icons.play className="h-4 w-4 mr-2" />
+              Premiers pas avec BonsAI Assist
+            </Button>
+            <Button variant="outline" className="w-full justify-start">
+              <Icons.play className="h-4 w-4 mr-2" />
+              Techniques de taille avancées
+            </Button>
+            <Button variant="outline" className="w-full justify-start">
+              <Icons.play className="h-4 w-4 mr-2" />
+              Soins saisonniers
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icons.users className="h-5 w-5" />
+              Communauté
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full justify-start">
+              <Icons.message className="h-4 w-4 mr-2" />
+              Forum de discussion
+            </Button>
+            <Button variant="outline" className="w-full justify-start">
+              <Icons.share className="h-4 w-4 mr-2" />
+              Partager vos créations
+            </Button>
+            <Button variant="outline" className="w-full justify-start">
+              <Icons.award className="h-4 w-4 mr-2" />
+              Concours mensuels
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 
