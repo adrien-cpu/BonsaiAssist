@@ -64,7 +64,6 @@ import {
   VolumeX,
   Play,
   Pause,
-  Stop,
   SkipBack,
   SkipForward,
   Repeat,
@@ -169,7 +168,6 @@ export const Icons = {
   volumeOff: VolumeX,
   play: Play,
   pause: Pause,
-  stop: Stop,
   
   // Interaction
   heart: Heart,
