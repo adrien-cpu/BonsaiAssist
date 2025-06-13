@@ -37,11 +37,20 @@ interface BonsaiCharacteristics {
   seasonalChanges: string;
 }
 
+// Interface pour les résultats complets de l'IA
+interface AIAnalysisResult {
+  identifiedSpecies: string;
+  confidence: number;
+  characteristics: BonsaiCharacteristics;
+  description: string;
+  reasoning: string;
+}
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [identificationResult, setIdentificationResult] = useState<IdentifySpeciesOutput | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
   const [pruningSuggestions, setPruningSuggestions] = useState<SuggestPruningOutput | null>(null);
   const [careSuggestions, setCareSuggestions] = useState<SuggestCareOutput | null>(null);
   const [description, setDescription] = useState('');
@@ -56,6 +65,7 @@ export default function HomePage() {
     seasonalChanges: ''
   });
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [hasUserModifications, setHasUserModifications] = useState(false);
   const [userGoals, setUserGoals] = useState('');
   const [currentSeason, setCurrentSeason] = useState('Spring');
   const [treeHealth, setTreeHealth] = useState('');
@@ -64,15 +74,150 @@ export default function HomePage() {
   const { weather } = useWeather('Paris');
   const { toast } = useToast();
 
-  // Générer une description automatique basée sur l'image
-  const generateAIDescription = async (imageUrl: string) => {
+  // Analyse complète IA de l'image
+  const performAIAnalysis = async (imageUrl: string) => {
     setIsGeneratingDescription(true);
     try {
-      // Simulation d'analyse IA de l'image pour pré-remplir les caractéristiques
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulation d'appel API
+      // Simulation d'analyse IA complète (à remplacer par un vrai appel API)
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Caractéristiques pré-remplies par l'IA (à remplacer par un vrai appel API)
-      const aiCharacteristics: BonsaiCharacteristics = {
+      // Résultats complets de l'analyse IA
+      const analysisResult: AIAnalysisResult = {
+        identifiedSpecies: 'Ficus retusa (Ficus Ginseng)',
+        confidence: 0.87,
+        characteristics: {
+          leafColor: 'Vert foncé brillant',
+          leafShape: 'Ovales, coriaces, 2-4 cm',
+          barkColor: 'Gris clair à beige',
+          barkTexture: 'Lisse avec racines aériennes apparentes',
+          treeSize: 'Moyen (20-30 cm de hauteur)',
+          branchStructure: 'Ramification dense, tronc épais caractéristique',
+          flowersFruits: 'Petites figues non comestibles (rare en intérieur)',
+          seasonalChanges: 'Feuillage persistant, croissance ralentie en hiver'
+        },
+        description: 'Ficus retusa, communément appelé Ficus Ginseng, reconnaissable à son tronc épais et bulbeux caractéristique. Les feuilles sont ovales, coriaces, d\'un vert foncé brillant, mesurant 2-4 cm. L\'écorce est gris clair à beige, lisse, avec des racines aériennes apparentes qui donnent son aspect distinctif. Taille moyenne de 20-30 cm avec une ramification dense. Produit de petites figues non comestibles (rare en intérieur). Feuillage persistant avec une croissance ralentie en hiver.',
+        reasoning: 'Identification basée sur : tronc bulbeux caractéristique (95% de certitude), forme et texture des feuilles (90%), couleur et texture de l\'écorce (85%), structure générale de l\'arbre (80%)'
+      };
+      
+      setAiAnalysis(analysisResult);
+      setCharacteristics(analysisResult.characteristics);
+      setDescription(analysisResult.description);
+      setHasUserModifications(false);
+      
+      // Créer aussi le résultat d'identification pour compatibilité
+      setIdentificationResult({
+        species: analysisResult.identifiedSpecies,
+        confidence: analysisResult.confidence,
+        characteristics: analysisResult.reasoning
+      });
+      
+      toast({
+        title: "Analyse IA terminée",
+        description: `Espèce identifiée: ${analysisResult.identifiedSpecies} (${Math.round(analysisResult.confidence * 100)}% de confiance)`,
+      });
+    } catch (error) {
+      console.error('Error performing AI analysis:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'analyser l'image",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
+  // Mettre à jour une caractéristique et marquer comme modifié
+  const updateCharacteristic = (key: keyof BonsaiCharacteristics, value: string) => {
+    setCharacteristics(prev => ({ ...prev, [key]: value }));
+    setHasUserModifications(true);
+    updateDescriptionFromCharacteristics();
+  };
+
+  // Mettre à jour la description et marquer comme modifié
+  const updateDescription = (value: string) => {
+    setDescription(value);
+    setHasUserModifications(true);
+  };
+
+  // Fonction pour enseigner l'IA avec les corrections
+  const teachAI = async () => {
+    if (!aiAnalysis || !hasUserModifications) {
+      toast({
+        title: "Aucune correction",
+        description: "Aucune modification détectée pour enseigner l'IA",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Préparer les données de correction pour l'IA
+      const correctionData = {
+        originalImage: selectedImage,
+        aiAnalysis: aiAnalysis,
+        userCorrections: {
+          characteristics: characteristics,
+          description: description,
+          correctedSpecies: identificationResult?.species
+        },
+        timestamp: new Date().toISOString()
+      };
+      
+      // Simulation d'envoi à l'API d'apprentissage
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('Données d\'apprentissage envoyées:', correctionData);
+      
+      setHasUserModifications(false);
+      
+      toast({
+        title: "IA mise à jour",
+        description: "Merci ! Vos corrections ont été intégrées pour améliorer l'IA.",
+      });
+    } catch (error) {
+      console.error('Error teaching AI:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'envoyer les corrections",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Réinitialiser aux valeurs IA originales
+  const resetToAIValues = () => {
+    if (aiAnalysis) {
+      setCharacteristics(aiAnalysis.characteristics);
+      setDescription(aiAnalysis.description);
+      setIdentificationResult({
+        species: aiAnalysis.identifiedSpecies,
+        confidence: aiAnalysis.confidence,
+        characteristics: aiAnalysis.reasoning
+      });
+      setHasUserModifications(false);
+      
+      toast({
+        title: "Valeurs restaurées",
+        description: "Les valeurs originales de l'IA ont été restaurées",
+      });
+    }
+  };
+
+  // Générer une description automatique basée sur les caractéristiques
+  const generateDescriptionFromCharacteristics = () => {
+    const desc = `${identificationResult?.species || 'Bonsaï'} avec des feuilles ${characteristics.leafShape.toLowerCase()} de couleur ${characteristics.leafColor.toLowerCase()}. L'écorce est ${characteristics.barkColor.toLowerCase()} avec une texture ${characteristics.barkTexture.toLowerCase()}. Taille: ${characteristics.treeSize.toLowerCase()}. Structure: ${characteristics.branchStructure.toLowerCase()}. ${characteristics.flowersFruits}. ${characteristics.seasonalChanges}.`;
+    return desc;
+  };
+
+  // Mettre à jour la description quand les caractéristiques changent
+  const updateDescriptionFromCharacteristics = () => {
+    const desc = generateDescriptionFromCharacteristics();
+    setDescription(desc);
+  };
         leafColor: 'Vert foncé',
         leafShape: 'Ovales, petites',
         barkColor: 'Gris-brun',
@@ -230,8 +375,8 @@ export default function HomePage() {
             ctx.drawImage(video, 0, 0);
             const imageData = canvas.toDataURL('image/jpeg', 0.8);
             setSelectedImage(imageData);
-            // Générer automatiquement la description IA
-            generateAIDescription(imageData);
+            // Lancer l'analyse IA complète
+            performAIAnalysis(imageData);
             
             toast({
               title: "Photo capturée",
