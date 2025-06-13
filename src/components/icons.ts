@@ -85,7 +85,6 @@ import {
   MemoryStick,
   Monitor as MonitorIcon,
   Printer,
-  Scanner,
   Keyboard,
   Mouse,
   Headphones,
@@ -208,7 +207,6 @@ export const Icons = {
   
   // Peripherals
   printer: Printer,
-  scanner: Scanner,
   keyboard: Keyboard,
   mouse: Mouse,
   headphones: Headphones,
