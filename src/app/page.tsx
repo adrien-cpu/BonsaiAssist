@@ -21,7 +21,7 @@ import { useWeather } from '@/hooks/use-weather';
 import { identifySpecies, type IdentifySpeciesOutput } from '@/ai/flows/identify-species';
 import { suggestPruning, type SuggestPruningOutput } from '@/ai/flows/suggest-pruning';
 import { suggestCare, type SuggestCareOutput } from '@/ai/flows/suggest-care';
-import { BonsaiSpecies, CareReminder, BonsaiProfile } from '@/types';
+import { BonsaiSpecies, CareReminder, BonsaiProfile, Tutorial, CommunityPost } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -65,6 +65,82 @@ const mockSpecies: BonsaiSpecies[] = [
   },
 ];
 
+// Mock tutorials data
+const mockTutorials: Tutorial[] = [
+  {
+    id: '1',
+    title: 'Premiers pas avec les bonsaïs',
+    description: 'Apprenez les bases de l\'entretien des bonsaïs',
+    difficulty: 'beginner',
+    duration: 15,
+    category: 'care',
+    tools: ['Arrosoir', 'Sécateur'],
+    steps: [
+      {
+        title: 'Choisir l\'emplacement',
+        description: 'Placez votre bonsaï dans un endroit lumineux mais sans soleil direct',
+        tips: ['Évitez les courants d\'air', 'Maintenez une température stable']
+      },
+      {
+        title: 'Arrosage',
+        description: 'Arrosez quand la terre commence à sécher en surface',
+        tips: ['Utilisez de l\'eau à température ambiante', 'Arrosez lentement et uniformément']
+      }
+    ]
+  },
+  {
+    id: '2',
+    title: 'Techniques de taille avancées',
+    description: 'Maîtrisez l\'art de la taille pour façonner votre bonsaï',
+    difficulty: 'advanced',
+    duration: 45,
+    category: 'pruning',
+    tools: ['Sécateur de précision', 'Pince concave', 'Mastic cicatrisant'],
+    steps: [
+      {
+        title: 'Analyser la structure',
+        description: 'Observez la forme actuelle et visualisez le résultat souhaité',
+        tips: ['Prenez du recul pour avoir une vue d\'ensemble', 'Identifiez les branches principales']
+      },
+      {
+        title: 'Coupes structurelles',
+        description: 'Effectuez les coupes importantes pour définir la silhouette',
+        tips: ['Coupez toujours au-dessus d\'un bourgeon', 'Utilisez un mastic pour les grosses coupes']
+      }
+    ]
+  }
+];
+
+// Mock community posts
+const mockCommunityPosts: CommunityPost[] = [
+  {
+    id: '1',
+    userId: 'user1',
+    userName: 'Marie Dubois',
+    title: 'Mon érable après 3 ans de soins',
+    content: 'Voici l\'évolution de mon érable japonais. Les couleurs d\'automne sont magnifiques cette année !',
+    images: ['https://images.pexels.com/photos/1002703/pexels-photo-1002703.jpeg'],
+    tags: ['érable', 'automne', 'progression'],
+    likes: 24,
+    comments: 8,
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    category: 'showcase'
+  },
+  {
+    id: '2',
+    userId: 'user2',
+    userName: 'Pierre Martin',
+    title: 'Aide : feuilles qui jaunissent',
+    content: 'Mon ficus perd ses feuilles depuis quelques jours. Quelqu\'un a-t-il déjà eu ce problème ?',
+    images: [],
+    tags: ['ficus', 'problème', 'feuilles'],
+    likes: 12,
+    comments: 15,
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    category: 'help'
+  }
+];
+
 export default function IndexPage() {
   const [mounted, setMounted] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -95,6 +171,16 @@ export default function IndexPage() {
   const [newBonsaiAge, setNewBonsaiAge] = useState<number>(1);
   const [newBonsaiName, setNewBonsaiName] = useState('');
   const [newBonsaiLocation, setNewBonsaiLocation] = useState<'indoor' | 'outdoor' | 'greenhouse'>('indoor');
+  const [selectedBonsai, setSelectedBonsai] = useState<BonsaiProfile | null>(null);
+  
+  // Tutorial states
+  const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  
+  // Community states
+  const [newPostTitle, setNewPostTitle] = useState('');
+  const [newPostContent, setNewPostContent] = useState('');
+  const [newPostCategory, setNewPostCategory] = useState<'showcase' | 'help' | 'tutorial' | 'discussion'>('showcase');
   
   // Hooks
   const { bonsaiProfiles, careReminders, addCareReminder, updateCareReminder, saveBonsaiProfile } = useBonsaiData();
@@ -461,7 +547,12 @@ export default function IndexPage() {
                   </div>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => setSelectedBonsai(bonsai)}
+                  >
                     <Icons.eye className="h-4 w-4 mr-1" />
                     Voir
                   </Button>
@@ -474,6 +565,102 @@ export default function IndexPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Détail du bonsaï sélectionné */}
+      {selectedBonsai && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>{selectedBonsai.name}</CardTitle>
+              <Button variant="outline" onClick={() => setSelectedBonsai(null)}>
+                <Icons.close className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="info">
+              <TabsList>
+                <TabsTrigger value="info">Informations</TabsTrigger>
+                <TabsTrigger value="care">Soins</TabsTrigger>
+                <TabsTrigger value="history">Historique</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="info" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Espèce</label>
+                    <p className="text-sm text-muted-foreground">{selectedBonsai.species}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Âge</label>
+                    <p className="text-sm text-muted-foreground">{selectedBonsai.age} ans</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Emplacement</label>
+                    <p className="text-sm text-muted-foreground">{selectedBonsai.location}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Taille du pot</label>
+                    <p className="text-sm text-muted-foreground">{selectedBonsai.potSize}</p>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="care" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Dernier arrosage</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-lg font-semibold">
+                        {new Date(selectedBonsai.lastWatered).toLocaleDateString()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Dernière fertilisation</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-lg font-semibold">
+                        {new Date(selectedBonsai.lastFertilized).toLocaleDateString()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Dernière taille</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-lg font-semibold">
+                        {new Date(selectedBonsai.lastPruned).toLocaleDateString()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="history" className="space-y-4">
+                <div className="space-y-3">
+                  {selectedBonsai.careHistory.map((entry, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
+                      <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{entry.action}</p>
+                        <p className="text-xs text-muted-foreground">{entry.notes}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(entry.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       )}
 
       {/* Espèces populaires */}
@@ -901,6 +1088,428 @@ export default function IndexPage() {
     </div>
   );
 
+  const renderTutorials = () => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Tutoriels</h1>
+        <p className="text-muted-foreground">
+          Apprenez les techniques essentielles pour entretenir vos bonsaïs
+        </p>
+      </div>
+
+      {!selectedTutorial ? (
+        <>
+          {/* Filtres */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Filtres</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4">
+                <select className="p-2 border rounded-md">
+                  <option value="">Toutes les catégories</option>
+                  <option value="care">Soins</option>
+                  <option value="pruning">Taille</option>
+                  <option value="styling">Style</option>
+                  <option value="repotting">Rempotage</option>
+                </select>
+                <select className="p-2 border rounded-md">
+                  <option value="">Tous les niveaux</option>
+                  <option value="beginner">Débutant</option>
+                  <option value="intermediate">Intermédiaire</option>
+                  <option value="advanced">Avancé</option>
+                </select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Liste des tutoriels */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {mockTutorials.map((tutorial) => (
+              <Card key={tutorial.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg">{tutorial.title}</CardTitle>
+                      <CardDescription>{tutorial.description}</CardDescription>
+                    </div>
+                    <Badge variant={
+                      tutorial.difficulty === 'beginner' ? 'secondary' :
+                      tutorial.difficulty === 'intermediate' ? 'default' : 'destructive'
+                    }>
+                      {tutorial.difficulty}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Icons.clock className="h-4 w-4" />
+                      <span>{tutorial.duration} minutes</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Icons.list className="h-4 w-4" />
+                      <span>{tutorial.steps.length} étapes</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {tutorial.tools.slice(0, 3).map((tool, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {tool}
+                        </Badge>
+                      ))}
+                      {tutorial.tools.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{tutorial.tools.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <Button 
+                    className="w-full mt-4"
+                    onClick={() => {
+                      setSelectedTutorial(tutorial);
+                      setCurrentStep(0);
+                    }}
+                  >
+                    Commencer le tutoriel
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      ) : (
+        /* Tutoriel sélectionné */
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{selectedTutorial.title}</CardTitle>
+                <CardDescription>
+                  Étape {currentStep + 1} sur {selectedTutorial.steps.length}
+                </CardDescription>
+              </div>
+              <Button variant="outline" onClick={() => setSelectedTutorial(null)}>
+                <Icons.close className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Barre de progression */}
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-primary h-2 rounded-full transition-all"
+                  style={{ width: `${((currentStep + 1) / selectedTutorial.steps.length) * 100}%` }}
+                />
+              </div>
+
+              {/* Étape actuelle */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">
+                  {selectedTutorial.steps[currentStep].title}
+                </h3>
+                <p className="text-muted-foreground">
+                  {selectedTutorial.steps[currentStep].description}
+                </p>
+                
+                {selectedTutorial.steps[currentStep].tips.length > 0 && (
+                  <div className="bg-accent/20 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">💡 Conseils :</h4>
+                    <ul className="space-y-1">
+                      {selectedTutorial.steps[currentStep].tips.map((tip, index) => (
+                        <li key={index} className="text-sm">• {tip}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation */}
+              <div className="flex justify-between">
+                <Button 
+                  variant="outline"
+                  onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+                  disabled={currentStep === 0}
+                >
+                  <Icons.chevronLeft className="h-4 w-4 mr-2" />
+                  Précédent
+                </Button>
+                
+                {currentStep < selectedTutorial.steps.length - 1 ? (
+                  <Button onClick={() => setCurrentStep(currentStep + 1)}>
+                    Suivant
+                    <Icons.chevronRight className="h-4 w-4 ml-2" />
+                  </Button>
+                ) : (
+                  <Button onClick={() => {
+                    toast({
+                      title: 'Tutoriel terminé !',
+                      description: 'Félicitations, vous avez terminé ce tutoriel.',
+                    });
+                    setSelectedTutorial(null);
+                  }}>
+                    Terminer
+                    <Icons.success className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
+  const renderCommunity = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Communauté</h1>
+          <p className="text-muted-foreground">
+            Partagez vos expériences et apprenez des autres passionnés
+          </p>
+        </div>
+        <Button>
+          <Icons.plus className="h-4 w-4 mr-2" />
+          Nouveau post
+        </Button>
+      </div>
+
+      {/* Filtres */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Filtres</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <select className="p-2 border rounded-md">
+              <option value="">Toutes les catégories</option>
+              <option value="showcase">Vitrine</option>
+              <option value="help">Aide</option>
+              <option value="tutorial">Tutoriel</option>
+              <option value="discussion">Discussion</option>
+            </select>
+            <Input placeholder="Rechercher..." className="flex-1" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Posts de la communauté */}
+      <div className="space-y-6">
+        {mockCommunityPosts.map((post) => (
+          <Card key={post.id}>
+            <CardHeader>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Icons.user className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold">{post.userName}</h3>
+                    <Badge variant="outline" className="text-xs">
+                      {post.category}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {post.createdAt.toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <h4 className="font-semibold mb-2">{post.title}</h4>
+              <p className="text-sm text-muted-foreground mb-4">{post.content}</p>
+              
+              {post.images.length > 0 && (
+                <div className="mb-4">
+                  <img 
+                    src={post.images[0]} 
+                    alt="Post image"
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+              
+              <div className="flex flex-wrap gap-1 mb-4">
+                {post.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    #{tag}
+                  </Badge>
+                ))}
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="sm">
+                  <Icons.heart className="h-4 w-4 mr-1" />
+                  {post.likes}
+                </Button>
+                <Button variant="ghost" size="sm">
+                  <Icons.message className="h-4 w-4 mr-1" />
+                  {post.comments}
+                </Button>
+                <Button variant="ghost" size="sm">
+                  <Icons.share className="h-4 w-4 mr-1" />
+                  Partager
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderWeather = () => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Météo</h1>
+        <p className="text-muted-foreground">
+          Conditions météorologiques et conseils adaptés
+        </p>
+      </div>
+
+      {weather && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <WeatherWidget weather={weather} location="Paris" />
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Conseils selon la météo</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-medium text-blue-900">Arrosage</h4>
+                  <p className="text-sm text-blue-700">
+                    Avec {weather.humidity}% d'humidité, réduisez légèrement l'arrosage.
+                  </p>
+                </div>
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-medium text-green-900">Exposition</h4>
+                  <p className="text-sm text-green-700">
+                    Température idéale pour placer vos bonsaïs à l'extérieur.
+                  </p>
+                </div>
+                <div className="p-4 bg-orange-50 rounded-lg">
+                  <h4 className="font-medium text-orange-900">Protection</h4>
+                  <p className="text-sm text-orange-700">
+                    Vent de {weather.windSpeed} km/h : protégez les jeunes pousses.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSettings = () => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Paramètres</h1>
+        <p className="text-muted-foreground">
+          Configurez votre application selon vos préférences
+        </p>
+      </div>
+
+      <Tabs defaultValue="general">
+        <TabsList>
+          <TabsTrigger value="general">Général</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="account">Compte</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Préférences générales</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Langue</label>
+                <select className="w-full p-2 border rounded-md mt-1">
+                  <option value="fr">Français</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Unité de température</label>
+                <select className="w-full p-2 border rounded-md mt-1">
+                  <option value="celsius">Celsius (°C)</option>
+                  <option value="fahrenheit">Fahrenheit (°F)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Thème</label>
+                <select className="w-full p-2 border rounded-md mt-1">
+                  <option value="light">Clair</option>
+                  <option value="dark">Sombre</option>
+                  <option value="auto">Automatique</option>
+                </select>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notifications</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Rappels d'arrosage</p>
+                  <p className="text-sm text-muted-foreground">Recevoir des notifications pour l'arrosage</p>
+                </div>
+                <input type="checkbox" defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Conseils de taille</p>
+                  <p className="text-sm text-muted-foreground">Notifications pour les périodes de taille</p>
+                </div>
+                <input type="checkbox" defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Alertes météo</p>
+                  <p className="text-sm text-muted-foreground">Alertes pour conditions météo défavorables</p>
+                </div>
+                <input type="checkbox" />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="account" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Informations du compte</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Nom d'utilisateur</label>
+                <Input placeholder="Votre nom" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email</label>
+                <Input type="email" placeholder="votre@email.com" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Localisation</label>
+                <Input placeholder="Ville, Pays" className="mt-1" />
+              </div>
+              <Button>Sauvegarder les modifications</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'dashboard':
@@ -915,6 +1524,14 @@ export default function IndexPage() {
         return renderCare();
       case 'visualization':
         return renderVisualization();
+      case 'weather':
+        return renderWeather();
+      case 'tutorials':
+        return renderTutorials();
+      case 'community':
+        return renderCommunity();
+      case 'settings':
+        return renderSettings();
       default:
         return renderDashboard();
     }

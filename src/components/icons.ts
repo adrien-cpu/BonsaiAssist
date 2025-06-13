@@ -90,6 +90,7 @@ import {
   Headphones,
   Gamepad2,
   Joystick,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react"
 
@@ -212,6 +213,9 @@ export const Icons = {
   headphones: Headphones,
   gamepad: Gamepad2,
   joystick: Joystick,
+  
+  // Communication
+  message: MessageCircle,
 } as const
 
 export type IconName = keyof typeof Icons
