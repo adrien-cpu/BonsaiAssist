@@ -24,7 +24,6 @@ import { suggestCare, type SuggestCareOutput } from '@/ai/flows/suggest-care';
 import { BonsaiSpecies, CareReminder } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import * as UnityWebGL from 'react-unity-webgl';
 
 // Mock species data
 const mockSpecies: BonsaiSpecies[] = [
@@ -66,14 +65,8 @@ const mockSpecies: BonsaiSpecies[] = [
   },
 ];
 
-const unityConfig = {
-  loaderUrl: '/unity/bonsai_build.loader.js',
-  dataUrl: '/unity/bonsai_build.data',
-  frameworkUrl: '/unity/bonsai_build.framework.js',
-  codeUrl: '/unity/bonsai_build.wasm',
-};
-
 export default function IndexPage() {
+  const [mounted, setMounted] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,30 +93,11 @@ export default function IndexPage() {
   // Hooks
   const { bonsaiProfiles, careReminders, addCareReminder, updateCareReminder } = useBonsaiData();
   const { weather } = useWeather('Paris'); // Default to Paris
-  
-  // Unity integration
-  const {
-    unityProvider,
-    isLoaded: unityLoaded,
-    loadingErrorCode,
-    sendMessage,
-    addEventListener,
-    removeEventListener,
-  } = UnityWebGL.useUnityContext(unityConfig);
 
-  // Unity event handlers
-  const handleUnityEvent = (eventName: string, ...data: any[]) => {
-    console.log('Unity event:', eventName, data);
-  };
-
+  // Ensure component is mounted before rendering
   useEffect(() => {
-    addEventListener('BonsaiLoaded', handleUnityEvent);
-    addEventListener('PruningApplied', handleUnityEvent);
-    return () => {
-      removeEventListener('BonsaiLoaded', handleUnityEvent);
-      removeEventListener('PruningApplied', handleUnityEvent);
-    };
-  }, [addEventListener, removeEventListener]);
+    setMounted(true);
+  }, []);
 
   // Camera functions
   const enableCamera = async () => {
@@ -191,11 +165,6 @@ export default function IndexPage() {
         bonsaiDescription: speciesDescription,
       });
       setPruningSuggestions(result);
-      
-      // Send to Unity if loaded
-      if (unityLoaded) {
-        sendMessage('BonsaiManager', 'HighlightPruningAreas', JSON.stringify(result.branchIdentifications));
-      }
       
       toast({
         title: 'Suggestions de taille générées',
@@ -587,37 +556,17 @@ export default function IndexPage() {
         </CardHeader>
         <CardContent>
           <div className="aspect-video border rounded-lg overflow-hidden bg-muted">
-            {unityLoaded ? (
-              <UnityWebGL.Unity
-                unityProvider={unityProvider as any}
-                style={{ width: '100%', height: '100%' }}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <Icons.spinner className="h-8 w-8 animate-spin mx-auto mb-4" />
-                  <p className="text-muted-foreground">Chargement du modèle 3D...</p>
-                  {loadingErrorCode && (
-                    <p className="text-red-500 text-sm mt-2">
-                      Erreur de chargement: {loadingErrorCode}
-                    </p>
-                  )}
-                </div>
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <Icons.spinner className="h-8 w-8 animate-spin mx-auto mb-4" />
+                <p className="text-muted-foreground">Chargement du modèle 3D...</p>
               </div>
-            )}
+            </div>
           </div>
 
-          {pruningSuggestions && unityLoaded && (
+          {pruningSuggestions && (
             <div className="mt-4">
-              <Button
-                onClick={() => {
-                  sendMessage(
-                    'BonsaiManager',
-                    'HighlightPruningAreas',
-                    JSON.stringify(pruningSuggestions.branchIdentifications)
-                  );
-                }}
-              >
+              <Button>
                 <Icons.eye className="h-4 w-4 mr-2" />
                 Afficher les zones de taille
               </Button>
@@ -644,6 +593,11 @@ export default function IndexPage() {
         return renderDashboard();
     }
   };
+
+  // Don't render until mounted to avoid hydration issues
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <SidebarProvider>
