@@ -55,24 +55,42 @@ export default function HomePage() {
   const handleCameraCapture = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      // Créer un élément video pour capturer l&apos;image
+      
+      // Créer un élément video temporaire
       const video = document.createElement('video');
       video.srcObject = stream;
+      video.autoplay = true;
+      video.muted = true;
       video.play();
       
-      video.addEventListener('loadedmetadata', () => {
+      // Attendre que la vidéo soit prête
+      await new Promise((resolve) => {
+        video.addEventListener('loadedmetadata', resolve, { once: true });
+      });
+      
+      // Attendre un court délai pour que l'image se stabilise
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Créer le canvas et capturer l'image
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      
+      if (ctx) {
+        ctx.drawImage(video, 0, 0);
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
-        ctx?.drawImage(video, 0, 0);
         
         const imageData = canvas.toDataURL('image/jpeg');
         setSelectedImage(imageData);
-        
-        // Arrêter le stream
-        stream.getTracks().forEach(track => track.stop());
-      });
+      }
+      
+      // Arrêter le stream
+      stream.getTracks().forEach(track => track.stop());
+      
     } catch (error) {
       console.error('Camera error:', error);
       toast({
