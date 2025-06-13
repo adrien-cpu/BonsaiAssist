@@ -212,7 +212,7 @@ export default function IndexPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
         <p className="text-muted-foreground">
-          Vue d'ensemble de votre collection de bonsaïs
+          Vue d'ensemble de votre collection de bonsaïs et activités récentes
         </p>
       </div>
 
@@ -251,6 +251,187 @@ export default function IndexPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Activités récentes */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Icons.activity className="h-5 w-5" />
+            Activités récentes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 p-3 rounded-lg border">
+              <Icons.scissors className="h-4 w-4 text-orange-500" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Taille effectuée</p>
+                <p className="text-xs text-muted-foreground">Érable japonais - Il y a 2 jours</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg border">
+              <Icons.droplets className="h-4 w-4 text-blue-500" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Arrosage</p>
+                <p className="text-xs text-muted-foreground">Ficus Ginseng - Hier</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg border">
+              <Icons.search className="h-4 w-4 text-green-500" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Espèce identifiée</p>
+                <p className="text-xs text-muted-foreground">Pin noir du Japon - Il y a 3 jours</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Conseils du jour */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Icons.leaf className="h-5 w-5" />
+            Conseil du jour
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-accent/20 rounded-lg">
+            <p className="text-sm">
+              <strong>Astuce saisonnière :</strong> En hiver, réduisez l'arrosage de vos bonsaïs d'intérieur. 
+              La terre doit sécher légèrement entre deux arrosages pour éviter la pourriture des racines.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderCollection = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Ma Collection</h1>
+          <p className="text-muted-foreground">
+            Gérez et suivez l'évolution de vos bonsaïs
+          </p>
+        </div>
+        <Button>
+          <Icons.plus className="h-4 w-4 mr-2" />
+          Ajouter un bonsaï
+        </Button>
+      </div>
+
+      {/* Filtres et recherche */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Filtres</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <Input placeholder="Rechercher par nom ou espèce..." className="flex-1" />
+            <Button variant="outline">
+              <Icons.filter className="h-4 w-4 mr-2" />
+              Filtrer
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Liste des bonsaïs */}
+      {bonsaiProfiles.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Icons.tree className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2">Aucun bonsaï dans votre collection</h3>
+            <p className="text-muted-foreground mb-4">
+              Commencez par ajouter votre premier bonsaï pour suivre son évolution
+            </p>
+            <Button>
+              <Icons.plus className="h-4 w-4 mr-2" />
+              Ajouter mon premier bonsaï
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {bonsaiProfiles.map((bonsai) => (
+            <Card key={bonsai.id} className="cursor-pointer hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg">{bonsai.name}</CardTitle>
+                    <CardDescription>{bonsai.species}</CardDescription>
+                  </div>
+                  <Badge variant={
+                    bonsai.healthStatus === 'excellent' ? 'default' :
+                    bonsai.healthStatus === 'good' ? 'secondary' :
+                    bonsai.healthStatus === 'fair' ? 'outline' : 'destructive'
+                  }>
+                    {bonsai.healthStatus}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Icons.calendar className="h-4 w-4" />
+                    <span>Âge: {bonsai.age} ans</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Icons.droplets className="h-4 w-4" />
+                    <span>Dernier arrosage: {new Date(bonsai.lastWatered).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Icons.scissors className="h-4 w-4" />
+                    <span>Dernière taille: {new Date(bonsai.lastPruned).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Icons.home className="h-4 w-4" />
+                    <span>Emplacement: {bonsai.location}</span>
+                  </div>
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <Button size="sm" variant="outline" className="flex-1">
+                    <Icons.eye className="h-4 w-4 mr-1" />
+                    Voir
+                  </Button>
+                  <Button size="sm" variant="outline" className="flex-1">
+                    <Icons.edit className="h-4 w-4 mr-1" />
+                    Modifier
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Espèces populaires */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Espèces populaires</CardTitle>
+          <CardDescription>
+            Découvrez les espèces les plus appréciées par la communauté
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {mockSpecies.map((species) => (
+              <SpeciesCard
+                key={species.id}
+                species={species}
+                onClick={() => {
+                  toast({
+                    title: 'Espèce sélectionnée',
+                    description: `Vous pouvez maintenant ajouter un ${species.commonName} à votre collection.`,
+                  });
+                }}
+              />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 
@@ -581,6 +762,8 @@ export default function IndexPage() {
     switch (currentPage) {
       case 'dashboard':
         return renderDashboard();
+      case 'collection':
+        return renderCollection();
       case 'identify':
         return renderIdentification();
       case 'pruning':
