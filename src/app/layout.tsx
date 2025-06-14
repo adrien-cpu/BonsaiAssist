@@ -7,6 +7,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
+import { Header } from '@/components/layout/header'; // Update to named import
+import { Navigation } from '@/components/layout/navigation';
 // Configure la police sans-serif Geist
 const geistSans = Geist({
   variable: '--font-geist-sans', // Variable CSS pour la police
@@ -46,7 +48,13 @@ export default function RootLayout({
     <html lang="fr">
       {/* Applique les variables de police et l'antialiasing au corps du document */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children} { /* Affiche les composants enfants */}
+        <Header />
+        <div className="flex">
+          <div className="sidebar-hidden-mobile">
+            <Navigation currentPage="" onPageChange={() => {}} /> {/* You'll need to manage currentPage and onPageChange state */}
+          </div>
+          <main className="flex-1">{children}</main> {/* Placeholder for main content */}
+        </div>
       </body>
     </html>
   );

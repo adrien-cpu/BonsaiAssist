@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@opentelemetry/exporter-jaeger": "^1.28.0",
+    "@types/caseless": "^0.12.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

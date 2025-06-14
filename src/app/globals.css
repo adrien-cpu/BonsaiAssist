@@ -87,3 +87,55 @@ body {
   }
 }
 
+/* Basic header styles (adjust as needed) */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--background); /* Use your background variable */
+}
+
+/* Hide hamburger icon on larger screens */
+.hamburger-icon {
+  display: none;
+}
+
+/* Navigation links styling */
+.header-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) { /* Adjust breakpoint as needed */
+  .hamburger-icon {
+    display: block; /* Show hamburger on smaller screens */
+  }
+
+  .header-nav {
+    display: none; /* Hide navigation links by default on smaller screens */
+    flex-direction: column;
+    width: 100%;
+    position: absolute; /* Position absolutely to overlay content */
+    top: 60px; /* Adjust based on your header height */
+    left: 0;
+    background-color: var(--background); /* Use your background variable */
+    z-index: 10; /* Ensure it's above other content */
+  }
+
+  .header-nav-open {
+    display: flex; /* Show navigation links when menu is open */
+  }
+}
+
+/* Hide sidebar on smaller screens */
+@media (max-width: 768px) { /* Use the same breakpoint as header */
+ .sidebar-hidden-mobile {
+    display: none;
+  }
+}
+
+
+
